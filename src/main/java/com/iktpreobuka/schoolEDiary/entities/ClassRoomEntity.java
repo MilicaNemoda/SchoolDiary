@@ -6,20 +6,29 @@ import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+@Entity
 public class ClassRoomEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
+	@Column(nullable = false)
 	private String name;
-	
-	@OneToOne(mappedBy = "classRoom", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	private ClassHeadTeacherEntity classElder;
-	
+
+//	@OneToOne(mappedBy = "classRoom", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+//	private ClassHeadTeacherEntity classElder;
+
 //	@JsonView(Views.Private.class)
 //	@JsonManagedReference
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
@@ -27,8 +36,8 @@ public class ClassRoomEntity {
 			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
 	private Set<StudentEntity> teachers = new HashSet<StudentEntity>();
-	
-	@OneToMany(mappedBy = "student_classroom", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+
+	@OneToMany(mappedBy = "studentClassroom", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<StudentEntity> students = new ArrayList<>();
 
 	public ClassRoomEntity() {
@@ -52,13 +61,13 @@ public class ClassRoomEntity {
 		this.name = name;
 	}
 
-	public ClassHeadTeacherEntity getClassElder() {
-		return classElder;
-	}
-
-	public void setClassElder(ClassHeadTeacherEntity classElder) {
-		this.classElder = classElder;
-	}
+//	public ClassHeadTeacherEntity getClassElder() {
+//		return classElder;
+//	}
+//
+//	public void setClassElder(ClassHeadTeacherEntity classElder) {
+//		this.classElder = classElder;
+//	}
 
 	public Set<StudentEntity> getTeachers() {
 		return teachers;

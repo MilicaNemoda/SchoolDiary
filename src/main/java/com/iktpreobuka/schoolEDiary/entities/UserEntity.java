@@ -2,31 +2,49 @@
 package com.iktpreobuka.schoolEDiary.entities;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "User_Type")
 public class UserEntity {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 //	@JsonView(Views.Public.class)
 //	@JsonProperty("ID")
 	private Integer id;
+	@Column(nullable = false)
 //	@JsonView(Views.Public.class)
-	private String firstname;
+	private String firstName;
+	@Column(nullable = false)
 //	@JsonView(Views.Public.class)
-	private String lastname;
+	private String lastName;
+	@Column(nullable = false)
 //	@JsonView(Views.Public.class)
 	private String username;
+	@Column(nullable = false)
 //	@JsonView(Views.Admin.class)
 	private String email;
+	@Column(nullable = false)
 //	@JsonIgnore
 	private String password;
-		
+
 //	@JsonView(Views.Private.class)
 //	@JsonManagedReference
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_address")
-	protected AddressEntity address;
-	
+	@JoinColumn(name = "userAddress")
+	protected AddressEntity userAddress;
+
 	public UserEntity() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -56,28 +74,28 @@ public class UserEntity {
 		this.password = password;
 	}
 
-	public String getFirstname() {
-		return firstname;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+	public void setFirstName(String firstname) {
+		this.firstName = firstname;
 	}
 
-	public String getLastname() {
-		return lastname;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
+	public void setLastName(String lastname) {
+		this.lastName = lastname;
 	}
 
 	public AddressEntity getAddress() {
-		return address;
+		return userAddress;
 	}
 
 	public void setAddress(AddressEntity address) {
-		this.address = address;
+		this.userAddress = address;
 	}
 
 	public String getEmail() {
@@ -87,5 +105,5 @@ public class UserEntity {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
 }

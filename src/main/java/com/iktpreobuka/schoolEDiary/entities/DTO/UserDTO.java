@@ -2,8 +2,8 @@ package com.iktpreobuka.schoolEDiary.entities.DTO;
 
 public class UserDTO {
 	private Integer id;
-	private String firstname;
-	private String lastname;
+	private String firstName;
+	private String lastName;
 	private String username;
 	private String email;
 	private String password;
@@ -22,20 +22,20 @@ public class UserDTO {
 		this.id = id;
 	}
 
-	public String getFirstname() {
-		return firstname;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
+	public void setFirstName(String firstname) {
+		this.firstName = firstname;
 	}
 
-	public String getLastname() {
-		return lastname;
+	public String getLastName() {
+		return lastName;
 	}
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
+	public void setLastName(String lastname) {
+		this.lastName = lastname;
 	}
 
 	public String getUsername() {

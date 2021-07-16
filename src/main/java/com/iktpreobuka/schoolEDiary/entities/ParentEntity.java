@@ -4,11 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
+@Entity
+@DiscriminatorValue("Parent")
 public class ParentEntity extends UserEntity {
 //	@JsonView(Views.Private.class)
 //	@JsonManagedReference
