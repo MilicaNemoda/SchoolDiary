@@ -1,5 +1,8 @@
 package com.iktpreobuka.schoolEDiary.controllers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,29 +12,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.iktpreobuka.schoolEDiary.controllers.utils.RESTError;
 import com.iktpreobuka.schoolEDiary.entities.AddressEntity;
-import com.iktpreobuka.schoolEDiary.entities.GradeEntity;
+import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
 import com.iktpreobuka.schoolEDiary.entities.ParentEntity;
+import com.iktpreobuka.schoolEDiary.entities.SchoolClassEntity;
+import com.iktpreobuka.schoolEDiary.entities.SchoolYearEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
 import com.iktpreobuka.schoolEDiary.entities.SubjectEntity;
 import com.iktpreobuka.schoolEDiary.entities.TeacherEntity;
 import com.iktpreobuka.schoolEDiary.entities.UserEntity;
+import com.iktpreobuka.schoolEDiary.entities.DTO.GradeDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.ParentDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.StudentDTO;
+import com.iktpreobuka.schoolEDiary.entities.DTO.SubjectDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.TeacherDTO;
-import com.iktpreobuka.schoolEDiary.entities.DTO.UserDTO;
 import com.iktpreobuka.schoolEDiary.repositories.AddressRepository;
 import com.iktpreobuka.schoolEDiary.repositories.GradeRepository;
 import com.iktpreobuka.schoolEDiary.repositories.ParentRepository;
+import com.iktpreobuka.schoolEDiary.repositories.SchoolClassRepository;
+import com.iktpreobuka.schoolEDiary.repositories.SchoolYearRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.SubjectRepository;
 import com.iktpreobuka.schoolEDiary.repositories.TeacherRepository;
 import com.iktpreobuka.schoolEDiary.repositories.UserRepository;
+import com.iktpreobuka.schoolEDiary.services.FileHandler;
 
 @RestController
-@RequestMapping(value = "/api/v1/schoolEDiary/admin")//zasto bese api?
+@RequestMapping(value = "/api/v1/schoolEDiary/admin") // api application program interface
 public class AdminController {
 	@Autowired
 	private UserRepository userRepository;
@@ -50,48 +61,61 @@ public class AdminController {
 
 	@Autowired
 	private GradeRepository gradeRepository;
-	
+
 	@Autowired
 	private AddressRepository addressRepository;
+
+	@Autowired
+	private SchoolYearRepository schoolYearRepository;
 	
-//	@RequestMapping(method = RequestMethod.POST, value = "/user")
-//	public ResponseEntity<?> addTeacher(@RequestBody UserDTO user) {
-//
-//		// perform check if same username is used in database !subjectRepository.findByName(newSubject.getName()).equals(null)
-//		if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-//			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
-//					HttpStatus.FORBIDDEN);
-//		}
-//
-//		// check for matching password and repeatedPassword
-//		if (!user.getPassword().equals(user.getRepeatedPassword())) {
-//			return new ResponseEntity<RESTError>(new RESTError(555, "Passwords not matching"), HttpStatus.FORBIDDEN);
-//		}
-//
-//		UserEntity newUser = new TeacherEntity();
-//
-//		newUser.setUsername(user.getUsername());
-//		newUser.setEmail(user.getEmail());
-//		newUser.setPassword(user.getPassword());
-//		newUser.setFirstName(user.getFirstName());
-//		newUser.setLastName(user.getLastName());
-//		newUser.setDateOfBirth(user.getDateOfBirth());
+	@Autowired
+	private SchoolClassRepository schoolClassRepository;
+	
+//	@Autowired
+//	private FileHandler fileHandler;
+//	
+//// TODO: POST List of users and other entities 
+//	@RequestMapping(method = RequestMethod.POST, path = "/userListUpload")
+//	public String userListUpload(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
 //		
-//	return new ResponseEntity<UserEntity>(userRepository.save(newUser), HttpStatus.OK);
+//		return fileHandler.userListUpload(file, redirectAttributes);
 //	}
 
+// -- POST teacher
 	@RequestMapping(method = RequestMethod.POST, value = "/teacher")
 	public ResponseEntity<?> addTeacher(@RequestBody TeacherDTO teacher) {
 
-		// perform check if same username is used in database !subjectRepository.findByName(newSubject.getName()).equals(null)
-		if (!teacherRepository.findByUsername(teacher.getUsername()).equals(null)) {
-			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
+		// perform check if same username is used in database
+		// !subjectRepository.findByName(newSubject.getName()).equals(null)
+		if (teacherRepository.findByUsername(teacher.getUsername()).isPresent()) {
+			return new ResponseEntity<RESTError>(new RESTError(440, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
 		}
+		// TODO: proveri da li pasvord postoji?!
 
 		// check for matching password and repeatedPassword
 		if (!teacher.getPassword().equals(teacher.getRepeatedPassword())) {
-			return new ResponseEntity<RESTError>(new RESTError(555, "Passwords not matching"), HttpStatus.FORBIDDEN);
+			return new ResponseEntity<RESTError>(new RESTError(441, "Passwords not matching"), HttpStatus.FORBIDDEN);
+		}
+		
+		int i = 0;
+		Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
+		while (teacher.getSubjects().get(i)!= null) {
+			if (subjectRepository.findByName(teacher.getSubjects().get(i)).get() == null) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+			}
+			subjects.add(subjectRepository.findByName(teacher.getSubjects().get(i)).get());
+			i++;
+		}
+		
+		int j = 0;
+		Set<SchoolClassEntity> schoolClass = new HashSet<SchoolClassEntity>();
+		while (teacher.getClasses().get(j)!= null) {
+			if (schoolClassRepository.findByName(teacher.getClasses().get(j)).get() == null) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+			}
+			schoolClass.add(schoolClassRepository.findByName(teacher.getClasses().get(j)).get());
+			i++;
 		}
 
 		TeacherEntity newTeacher = new TeacherEntity();
@@ -101,18 +125,32 @@ public class AdminController {
 		newTeacher.setPassword(teacher.getPassword());
 		newTeacher.setFirstName(teacher.getFirstName());
 		newTeacher.setLastName(teacher.getLastName());
-		
-	return new ResponseEntity<TeacherEntity>(teacherRepository.save(newTeacher), HttpStatus.OK);
-	} 
-	//Da li u AdminController pisem POST za svaki tip usera posebno ili da napravim jednu metodu koja ce moci da prepozna tip?
+		newTeacher.setLastName(teacher.getLastName());
+		newTeacher.setLastName(teacher.getLastName());
+
+		return new ResponseEntity<TeacherEntity>(teacherRepository.save(newTeacher), HttpStatus.OK);
+	}
+	// Da li u AdminController pisem POST za svaki tip usera posebno ili da napravim
+	// jednu metodu koja ce moci da prepozna tip?
+
+	//--POST Student
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/student")
 	public ResponseEntity<?> addStudent(@RequestBody StudentDTO student) {
 
-		// perform check if same username is used in database !subjectRepository.findByName(newSubject.getName()).equals(null)
 		if (studentRepository.findByUsername(student.getUsername()).isPresent()) {
 			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
+		}
+
+		SchoolYearEntity schoolYear = schoolYearRepository.findByYear(student.getYear());
+		if (schoolYear == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school year."), HttpStatus.BAD_REQUEST);
+		}
+
+		SchoolClassEntity schoolClass = schoolClassRepository.findByName(student.getSchoolClass()).get();
+		if (schoolClass == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school class."), HttpStatus.BAD_REQUEST);
 		}
 
 		// check for matching password and repeatedPassword
@@ -127,72 +165,113 @@ public class AdminController {
 		newStudent.setPassword(student.getPassword());
 		newStudent.setFirstName(student.getFirstName());
 		newStudent.setLastName(student.getLastName());
-		newStudent.setDateOfBirth(student.getDateOfBirth());
-		
-	return new ResponseEntity<StudentEntity>(studentRepository.save(newStudent), HttpStatus.OK);
+		newStudent.setSchoolYear(schoolYear);
+		newStudent.setSchoolClass(schoolClass);
+		return new ResponseEntity<StudentEntity>(studentRepository.save(newStudent), HttpStatus.OK);
 	}
+
+	//--POST parent
 	
 	@RequestMapping(method = RequestMethod.POST, value = "/parent")
 	public ResponseEntity<?> addParent(@RequestBody ParentDTO parent) {
-
-		// perform check if same username is used in database !subjectRepository.findByName(newSubject.getName()).equals(null)
-		if (!parentRepository.findByUsername(parent.getUsername()).equals(null)) {
-			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
-					HttpStatus.FORBIDDEN);
-		}
-
-		// check for matching password and repeatedPassword
-		if (!parent.getPassword().equals(parent.getRepeatedPassword())) {
-			return new ResponseEntity<RESTError>(new RESTError(555, "Passwords not matching"), HttpStatus.FORBIDDEN);
+		int i = 0;
+		Set<StudentEntity> children = new HashSet<StudentEntity>();
+		while (parent.getChildUsername().get(i) != null) {
+			if (studentRepository.findByUsername(parent.getChildUsername().get(i)).get() == null) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+			}
+			children.add(studentRepository.findByUsername(parent.getChildUsername().get(i)).get());
+			i++;
 		}
 
 		ParentEntity newParent = new ParentEntity();
-
 		newParent.setUsername(parent.getUsername());
 		newParent.setEmail(parent.getEmail());
 		newParent.setPassword(parent.getPassword());
 		newParent.setFirstName(parent.getFirstName());
 		newParent.setLastName(parent.getLastName());
-		
-	return new ResponseEntity<ParentEntity>(parentRepository.save(newParent), HttpStatus.OK);
+		newParent.setStudent(children);
+		parentRepository.save(newParent);
+		return new ResponseEntity<ParentEntity>(newParent, HttpStatus.OK);
 	}
 	
+	//--POST address
+
 	@RequestMapping(method = RequestMethod.POST, value = "/address")
 	public ResponseEntity<?> addAddress(@RequestBody AddressEntity newAddress) {
 
 		if (addressRepository.findByStreet(newAddress.getStreet()).isPresent()) {
-			return new ResponseEntity<RESTError>(new RESTError(444, "Address already created."), HttpStatus.FORBIDDEN);
+			return new ResponseEntity<RESTError>(new RESTError(440, "Address already created."), HttpStatus.FORBIDDEN);
 		}
 		// promeni ovo 444, i sta bi jos moglo da se doda od validacije?
 		// proveri sta sve treba od validacije???!!!
 
 		return new ResponseEntity<AddressEntity>(addressRepository.save(newAddress), HttpStatus.OK);
 	}
+	
+	//--POST schoolYear
 
+	@RequestMapping(method = RequestMethod.POST, value = "/schoolYear")
+	public ResponseEntity<?> addSchoolYear(@RequestBody SchoolYearEntity newSchoolYear) {
+//			if (newSchoolYear.getName().equals(null) || newSchoolYear.getId().equals(null) || newSchoolYear.getGradeType().equals(null)) {
+//				return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
+//						HttpStatus.BAD_REQUEST);
+//			}
+			// promeni ovo 400, i sta bi jos moglo da se doda od validacije?
+			// proveri sta sve treba od validacije???!!!
+
+			return new ResponseEntity<SchoolYearEntity>(schoolYearRepository.save(newSchoolYear), HttpStatus.OK);
+
+		}
+	
+	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear{id}")
+	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
+		SchoolYearEntity newSchoolYear = schoolYearRepository.findById(id).get(); 
+//			
+			return new ResponseEntity<SchoolYearEntity>(schoolYearRepository.save(newSchoolYear), HttpStatus.OK);
+
+		}
+
+	//--POST subject
+	
 	@RequestMapping(method = RequestMethod.POST, value = "/subject")
-	public ResponseEntity<?> addSubject(@RequestBody SubjectEntity newSubject) {
+	public ResponseEntity<?> addSubject(@RequestBody SubjectDTO subject) {
 
-		if (!subjectRepository.findByName(newSubject.getName()).equals(null)) {
-			return new ResponseEntity<RESTError>(new RESTError(444, "Subject already created."), HttpStatus.FORBIDDEN);
+		if (subjectRepository.findByName(subject.getName()).isPresent()) {
+			return new ResponseEntity<RESTError>(new RESTError(440, "Subject already created."), HttpStatus.FORBIDDEN);
 		}
 		// promeni ovo 444, i sta bi jos moglo da se doda od validacije?
 		// proveri sta sve treba od validacije???!!!
+		
+		SchoolYearEntity schoolYear = schoolYearRepository.findByYear(subject.getYear());
+		if (schoolYear == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school year."), HttpStatus.BAD_REQUEST);
+		}
+		
+		SubjectEntity newSubject = new SubjectEntity();
+		newSubject.setName(subject.getName());
+		newSubject.setWeeklyNumberOfLectures(subject.getWeeklyNumberOfLectures());
+		newSubject.setSchoolYear(schoolYear);
 
 		return new ResponseEntity<SubjectEntity>(subjectRepository.save(newSubject), HttpStatus.OK);
 	}
+	
+	
 
-	@RequestMapping(method = RequestMethod.POST, value = "/grade")
-	public ResponseEntity<?> addGrade(@RequestBody GradeEntity newGrade) {
-		if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
-					HttpStatus.BAD_REQUEST);
-		}
-		// promeni ovo 400, i sta bi jos moglo da se doda od validacije?
-		// proveri sta sve treba od validacije???!!!
+	@RequestMapping(method = RequestMethod.POST, value = "/schoolClass")
+	public ResponseEntity<?> addClassRoom(@RequestBody SchoolClassEntity newSchoolClass) {
+//		if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
+//			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
+//					HttpStatus.BAD_REQUEST);
+//		}
+//		// promeni ovo 400, i sta bi jos moglo da se doda od validacije?
+//		// proveri sta sve treba od validacije???!!!
 
-		return new ResponseEntity<GradeEntity>(gradeRepository.save(newGrade), HttpStatus.OK);
+		return new ResponseEntity<SchoolClassEntity>(schoolClassRepository.save(newSchoolClass), HttpStatus.OK);
 
 	}
+	
+	//TODO: match schoolClass - schoolYear, schoolClassStudent
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/teacher/{id}")
 	public ResponseEntity<?> teacherUpdate(@RequestBody TeacherEntity updatedTeacher, @PathVariable Integer id) {
@@ -240,9 +319,9 @@ public class AdminController {
 				if (updatedStudent.getUsername() != null) {
 					studentEntity.setUsername(updatedStudent.getUsername());
 				}
-				if (updatedStudent.getDateOfBirth() != null) {
-					studentEntity.setDateOfBirth(updatedStudent.getDateOfBirth());
-				}
+//				if (updatedStudent.getDateOfBirth() != null) {
+//					studentEntity.setDateOfBirth(updatedStudent.getDateOfBirth());
+//				}
 				studentRepository.save(studentEntity);
 				return new ResponseEntity<StudentEntity>(studentEntity, HttpStatus.OK);
 			}
@@ -296,15 +375,67 @@ public class AdminController {
 		return new ResponseEntity<UserEntity>(user, HttpStatus.OK);
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/{user_id}/addressId")
-	public ResponseEntity<?> addAddressToAUser(@PathVariable Integer id, @RequestParam Integer adrId) {
+	// TODO: PUT Povezivanje studenta sa roditeljima,
+	// profesor i predmet, ucenik i odeljenje, ucenik i razred
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/{userId}/addressId")
+	public ResponseEntity<?> addAddressToUser(@PathVariable Integer id, @RequestBody AddressEntity adr) {
+		if (adr.getStreet().equals(null) || adr.getCountry().equals(null) || adr.getCity().equals(null)) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
+					HttpStatus.BAD_REQUEST);
+		}
 		UserEntity user = userRepository.findById(id).get();
-		AddressEntity address = addressRepository.findById(adrId).get();
-		user.setAddress(address);
-		userRepository.save(user); 
+		if (user == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
+		}
+		addressRepository.save(adr);
+		user.setAddress(adr);
+		userRepository.save(user);
 		return new ResponseEntity<UserEntity>(user, HttpStatus.OK);
-		// automatski ce biti sacuvana i adresa/		return user;//prepravljeno sa slajda 102
+
 	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
+	public ResponseEntity<?> addGradeToStudent(@RequestBody GradeDTO grade) {
+//			if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
+//			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
+//					HttpStatus.BAD_REQUEST);
+//		}
+		StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
+		if (student == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
+		}
+		SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
+		GradeRecordEntity newGrade = new GradeRecordEntity();
+		newGrade.setStudentGrade(student);
+		newGrade.setSubjectGrade(subject);
+		gradeRepository.save(newGrade);
+		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
+		// automatski ce biti sacuvana i adresa/ return user;//prepravljeno sa slajda
+		// 102
+	}
+
+//	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
+//	public ResponseEntity<?> changeGrade(@RequestBody GradeDTO grade) {
+////			if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
+////			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
+////					HttpStatus.BAD_REQUEST);
+//////		}
+////			StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
+////			if (student == null) {
+////				return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);}
+////			SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
+////			GradeRecordEntity newGrade = new GradeRecordEntity();
+////			newGrade.setStudentGrade(student);
+////			newGrade.setSubjectGrade(subject);
+////			gradeRepository.save(newGrade);
+////			return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
+////			// automatski ce biti sacuvana i adresa/ return user;//prepravljeno sa slajda 102
+//		return null;
+//	}
+
+
+
 	// GET Predmeta Nastavnika Učenika Roditelja Ocena
 	// DELETE Predmeta Nastavnika Učenika Roditelja Ocena
 }

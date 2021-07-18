@@ -1,26 +1,15 @@
-package com.iktpreobuka.schoolEDiary.entities;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+package com.iktpreobuka.schoolEDiary.entities.DTO;
 
 import helper.EGradeType;
 
-@Entity
-public class GradeEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-//	@JsonView(Views.Private.class)
-//	@JsonProperty("ID")
+public class GradeDTO {
 	private Integer id;
-	@Column(nullable = false)
 	private String name;
-	@Column(nullable = false)
 	private EGradeType gradeType;
-
-	public GradeEntity() {
+	private String studentUsername;
+	private String subjectName;
+	
+	public GradeDTO() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
@@ -49,4 +38,20 @@ public class GradeEntity {
 		this.gradeType = gradeType;
 	}
 
+	public String getStudentUsername() {
+		return studentUsername;
+	}
+
+	public void setStudentUsername(String studentUsername) {
+		this.studentUsername = studentUsername;
+	}
+
+	public String getSubjectName() {
+		return subjectName;
+	}
+
+	public void setSubjectName(String subjectName) {
+		this.subjectName = subjectName;
+	}
+	
 }

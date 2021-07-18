@@ -16,10 +16,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-public class ClassRoomEntity {
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class SchoolClassEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
@@ -37,10 +40,11 @@ public class ClassRoomEntity {
 					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
 	private Set<StudentEntity> teachers = new HashSet<StudentEntity>();
 
-	@OneToMany(mappedBy = "studentClassroom", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@JsonIgnore
+	@OneToMany(mappedBy = "studentSchoolClass", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<StudentEntity> students = new ArrayList<>();
 
-	public ClassRoomEntity() {
+	public SchoolClassEntity() {
 		super();
 		// TODO Auto-generated constructor stub
 	}

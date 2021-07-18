@@ -14,10 +14,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Version;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 @Entity
-//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})//cemu ovo sluzi?
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})//cemu ovo sluzi?
 public class AddressEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

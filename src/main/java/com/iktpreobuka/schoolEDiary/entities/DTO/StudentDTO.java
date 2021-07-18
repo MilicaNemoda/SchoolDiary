@@ -5,20 +5,40 @@ import java.sql.Date;
 public class StudentDTO extends UserDTO{
 //	@JsonView(Views.Admin.class)
 //	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
-	private Date dateOfBirth;
+//	private Date dateOfBirth;
+//	private String parentUsername;
+	private String schoolClass;
+	private Integer year;
 
 	public StudentDTO() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public Date getDateOfBirth() {
-		return dateOfBirth;
+//	public String getParentUsername() {
+//		return parentUsername;
+//	}
+//
+//	public void setParentUsername(String parentUsername) {
+//		this.parentUsername = parentUsername;
+//	}
+
+	public String getSchoolClass() {
+		return schoolClass;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
-		this.dateOfBirth = dateOfBirth;
+	public void setSchoolClass(String schoolClass) {
+		this.schoolClass = schoolClass;
 	}
+
+	public Integer getYear() {
+		return year;
+	}
+
+	public void setYear(Integer schoolYear) {
+		this.year = schoolYear;
+	}
+	
 	
 	
 }

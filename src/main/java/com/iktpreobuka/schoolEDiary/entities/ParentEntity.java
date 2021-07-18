@@ -12,7 +12,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
 @Entity
-@DiscriminatorValue("Parent")
+//@DiscriminatorValue("Parent")
 public class ParentEntity extends UserEntity {
 //	@JsonView(Views.Private.class)
 //	@JsonManagedReference
@@ -24,7 +24,6 @@ public class ParentEntity extends UserEntity {
 
 	public ParentEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Set<StudentEntity> getStudent() {

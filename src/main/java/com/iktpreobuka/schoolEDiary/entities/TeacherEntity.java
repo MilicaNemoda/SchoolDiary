@@ -1,30 +1,65 @@
 package com.iktpreobuka.schoolEDiary.entities;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
-@DiscriminatorValue("Teacher")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+//@DiscriminatorValue("Teacher")
 public class TeacherEntity extends UserEntity {
 
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Class", joinColumns = {
 			@JoinColumn(name = "Class_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
-	protected Set<ClassRoomEntity> classes = new HashSet<ClassRoomEntity>();
+	protected Set<SchoolClassEntity> classes = new HashSet<SchoolClassEntity>();
 
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
 			@JoinColumn(name = "Subject_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
 	protected Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "teacherGrade", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	private List<GradeRecordEntity> grades = new ArrayList<>();
 
+	public Set<SchoolClassEntity> getClasses() {
+		return classes;
+	}
+
+	public void setClasses(Set<SchoolClassEntity> classes) {
+		this.classes = classes;
+	}
+
+	public Set<SubjectEntity> getSubjects() {
+		return subjects;
+	}
+
+	public void setSubjects(Set<SubjectEntity> subjects) {
+		this.subjects = subjects;
+	}
+
+	public List<GradeRecordEntity> getGrades() {
+		return grades;
+	}
+
+	public void setGrades(List<GradeRecordEntity> grades) {
+		this.grades = grades;
+	}
+
+	
 }

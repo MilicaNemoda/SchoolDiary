@@ -15,8 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "User_Type")
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@DiscriminatorColumn(name = "User_Type")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)

@@ -12,21 +12,27 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import helper.ESemester;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class SchoolYearEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
 	@Column(nullable = false)
-	private Integer schoolYear;
-	@Column(nullable = false)
-	private ESemester semester;
+	private Integer year;
+//	@Column(nullable = false)
+//	private ESemester semester;
 
-	@OneToMany(mappedBy = "subjectYear", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@JsonIgnore
+	@OneToMany(mappedBy = "schoolYear", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<SubjectEntity> subjects = new ArrayList<>();
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "schoolYear", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<StudentEntity> students = new ArrayList<>();
 
@@ -43,21 +49,21 @@ public class SchoolYearEntity {
 		this.id = id;
 	}
 
-	public Integer getSchoolYear() {
-		return schoolYear;
+	public Integer getYear() {
+		return year;
 	}
 
-	public void setSchoolYear(Integer schoolYear) {
-		this.schoolYear = schoolYear;
+	public void setYear(Integer year) {
+		this.year = year;
 	}
 
-	public ESemester getSemester() {
-		return semester;
-	}
-
-	public void setSemester(ESemester semester) {
-		this.semester = semester;
-	}
+//	public ESemester getSemester() {
+//		return semester;
+//	}
+//
+//	public void setSemester(ESemester semester) {
+//		this.semester = semester;
+//	}
 
 	public List<SubjectEntity> getSubjects() {
 		return subjects;
