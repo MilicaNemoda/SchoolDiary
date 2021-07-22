@@ -3,19 +3,19 @@ package com.iktpreobuka.schoolEDiary.entities.DTO;
 import java.util.List;
 
 public class ParentDTO extends UserDTO {
-	List <String> childUsername;
+	List <String> childUsernames;
 
 	public ParentDTO() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public List<String> getChildUsername() {
-		return childUsername;
+	public List<String> getChildUsernames() {
+		return childUsernames;
 	}
 
-	public void setChildUsername(List<String> childUsername) {
-		this.childUsername = childUsername;
+	public void setChildUsernames(List<String> childUsernames) {
+		this.childUsernames = childUsernames;
 	}
 
 	

@@ -36,15 +36,15 @@ public class SubjectEntity {
 
 	@JsonView(Views.Private.class)
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinColumn(name = "schoolYear")
-	private SchoolYearEntity schoolYear;
+	@JoinColumn(name = "schoolYearSubject")
+	private SchoolYearEntity schoolYearSubject;
 
 	// @JsonView(Views.Private.class)
 //	@JsonManagedReference
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
-			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "Subject_id", nullable = false, updatable = false) })
+			@JoinColumn(name = "Subject_id", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
 	protected Set<TeacherEntity> teachers = new HashSet<TeacherEntity>();
 	
 	@JsonIgnore
@@ -76,11 +76,11 @@ public class SubjectEntity {
 	}
 
 	public SchoolYearEntity getSchoolYear() {
-		return schoolYear;
+		return schoolYearSubject;
 	}
 
 	public void setSchoolYear(SchoolYearEntity schoolYear) {
-		this.schoolYear = schoolYear;
+		this.schoolYearSubject = schoolYear;
 	}
 
 	public List<GradeRecordEntity> getGrades() {

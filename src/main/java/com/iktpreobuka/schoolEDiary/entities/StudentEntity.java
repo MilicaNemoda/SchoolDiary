@@ -18,6 +18,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 //@DiscriminatorValue("Student")
 public class StudentEntity extends UserEntity {
@@ -32,9 +34,10 @@ public class StudentEntity extends UserEntity {
 	private SchoolClassEntity studentSchoolClass;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-	@JoinColumn(name = "schoolYear")
-	private SchoolYearEntity schoolYear;
+	@JoinColumn(name = "schoolYearStudent")
+	private SchoolYearEntity schoolYearStudent;
 
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Parent_Student", joinColumns = {
 			@JoinColumn(name = "Student_id", nullable = false, updatable = false) }, inverseJoinColumns = {
@@ -49,14 +52,6 @@ public class StudentEntity extends UserEntity {
 		// TODO Auto-generated constructor stub
 	}
 
-//	public Date getDateOfBirth() {
-//		return dateOfBirth;
-//	}
-//
-//	public void setDateOfBirth(Date dateOfBirth) {
-//		this.dateOfBirth = dateOfBirth;
-//	}
-
 	public SchoolClassEntity getSchoolClass() {
 		return studentSchoolClass;
 	}
@@ -66,11 +61,11 @@ public class StudentEntity extends UserEntity {
 	}
 
 	public SchoolYearEntity getSchoolYear() {
-		return schoolYear;
+		return schoolYearStudent;
 	}
 
 	public void setSchoolYear(SchoolYearEntity schoolYear) {
-		this.schoolYear = schoolYear;
+		this.schoolYearStudent = schoolYear;
 	}
 
 	public Set<ParentEntity> getParent() {

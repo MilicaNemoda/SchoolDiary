@@ -19,6 +19,9 @@ import javax.persistence.OneToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.iktpreobuka.schoolEDiary.security.Views;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -32,12 +35,12 @@ public class SchoolClassEntity {
 //	@OneToOne(mappedBy = "classRoom", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 //	private ClassHeadTeacherEntity classElder;
 
-//	@JsonView(Views.Private.class)
-//	@JsonManagedReference
+	@JsonView(Views.Private.class)
+	@JsonManagedReference
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Class", joinColumns = {
-			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
+			@JoinColumn(name = "Class_id", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
 	private Set<StudentEntity> teachers = new HashSet<StudentEntity>();
 
 	@JsonIgnore

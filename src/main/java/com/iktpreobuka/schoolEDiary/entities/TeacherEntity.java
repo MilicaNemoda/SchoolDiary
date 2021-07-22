@@ -21,16 +21,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 //@DiscriminatorValue("Teacher")
 public class TeacherEntity extends UserEntity {
 
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Class", joinColumns = {
-			@JoinColumn(name = "Class_id", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
+			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
 	protected Set<SchoolClassEntity> classes = new HashSet<SchoolClassEntity>();
 
+	@JsonIgnore
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
-			@JoinColumn(name = "Subject_id", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
+			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
+					@JoinColumn(name = "Subject_id", nullable = false, updatable = false) })
 	protected Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
 	
 	@JsonIgnore

@@ -29,11 +29,11 @@ public class SchoolYearEntity {
 //	private ESemester semester;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "schoolYear", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@OneToMany(mappedBy = "schoolYearSubject", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<SubjectEntity> subjects = new ArrayList<>();
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "schoolYear", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@OneToMany(mappedBy = "schoolYearStudent", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
 	private List<StudentEntity> students = new ArrayList<>();
 
 	public SchoolYearEntity() {
