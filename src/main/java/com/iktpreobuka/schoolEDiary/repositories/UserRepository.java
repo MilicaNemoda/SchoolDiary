@@ -7,5 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 import com.iktpreobuka.schoolEDiary.entities.UserEntity;
 
 public interface UserRepository extends CrudRepository <UserEntity, Integer> {
+	
 	Optional <UserEntity> findByUsername(String username);
+	
+	Optional <UserEntity> findByEmail(String email);
 }

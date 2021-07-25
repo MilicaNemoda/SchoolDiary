@@ -32,24 +32,20 @@ public class SchoolClassEntity {
 	@Column(nullable = false)
 	private String name;
 
-//	@OneToOne(mappedBy = "classRoom", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-//	private ClassHeadTeacherEntity classElder;
-
 	@JsonView(Views.Private.class)
 	@JsonManagedReference
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)// prepravljeno u all
 	@JoinTable(name = "Teacher_Class", joinColumns = {
 			@JoinColumn(name = "Class_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })
-	private Set<StudentEntity> teachers = new HashSet<StudentEntity>();
+	private Set<TeacherEntity> teachers = new HashSet<TeacherEntity>();
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "studentSchoolClass", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@OneToMany(mappedBy = "studentSchoolClass", fetch = FetchType.LAZY, cascade =  CascadeType.REFRESH)// prepravljeno u all
 	private List<StudentEntity> students = new ArrayList<>();
 
 	public SchoolClassEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Integer getId() {
@@ -76,16 +72,16 @@ public class SchoolClassEntity {
 //		this.classElder = classElder;
 //	}
 
-	public Set<StudentEntity> getTeachers() {
+	public List<StudentEntity> getStudents() {
+		return students;
+	}
+
+	public Set<TeacherEntity> getTeachers() {
 		return teachers;
 	}
 
-	public void setTeachers(Set<StudentEntity> teachers) {
+	public void setTeachers(Set<TeacherEntity> teachers) {
 		this.teachers = teachers;
-	}
-
-	public List<StudentEntity> getStudents() {
-		return students;
 	}
 
 	public void setStudents(List<StudentEntity> students) {

@@ -41,7 +41,7 @@ public class SubjectEntity {
 
 	// @JsonView(Views.Private.class)
 //	@JsonManagedReference
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)// prepravljeno u all
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
 			@JoinColumn(name = "Subject_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) })

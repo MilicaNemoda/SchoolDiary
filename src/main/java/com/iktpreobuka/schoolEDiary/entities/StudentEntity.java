@@ -29,7 +29,7 @@ public class StudentEntity extends UserEntity {
 //	@ColumnDefault(value = "0001-01-01T00:00:00")
 	private Integer yearOfBirth;
 
-	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY) //promenjeno u all
 	@JoinColumn(name = "studentSchoolClass")
 	private SchoolClassEntity studentSchoolClass;
 

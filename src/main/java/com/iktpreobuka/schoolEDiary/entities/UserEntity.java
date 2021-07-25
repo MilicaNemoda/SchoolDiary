@@ -14,7 +14,10 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties({ "handler", "hibernateLazyInitializer" })
 //@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 //@DiscriminatorColumn(name = "User_Type")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -46,9 +49,19 @@ public class UserEntity {
 	@JoinColumn(name = "userAddress")
 	protected AddressEntity userAddress;
 
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "role")
+	private RoleEntity role;
+
 	public UserEntity() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String toString() {
+		return "UserEntity [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", username=" + username
+				+ ", email=" + email + ", userAddress=" + userAddress + ", role=" + role + "]";
 	}
 
 	public Integer getId() {
@@ -105,6 +118,22 @@ public class UserEntity {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public AddressEntity getUserAddress() {
+		return userAddress;
+	}
+
+	public void setUserAddress(AddressEntity userAddress) {
+		this.userAddress = userAddress;
+	}
+
+	public RoleEntity getRole() {
+		return role;
+	}
+
+	public void setRole(RoleEntity role) {
+		this.role = role;
 	}
 
 }

@@ -21,22 +21,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 //@DiscriminatorValue("Teacher")
 public class TeacherEntity extends UserEntity {
 
+	
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)// prepravljeno u all
 	@JoinTable(name = "Teacher_Class", joinColumns = {
 			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
 	protected Set<SchoolClassEntity> classes = new HashSet<SchoolClassEntity>();
 
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)// prepravljeno u all
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
 			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Subject_id", nullable = false, updatable = false) })
 	protected Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
 	
+	
 	@JsonIgnore
-	@OneToMany(mappedBy = "teacherGrade", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@OneToMany(mappedBy = "teacherGrade", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })// prepravljeno u all
 	private List<GradeRecordEntity> grades = new ArrayList<>();
 
 	public Set<SchoolClassEntity> getClasses() {

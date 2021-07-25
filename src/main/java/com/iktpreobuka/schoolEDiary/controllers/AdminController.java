@@ -7,14 +7,13 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.iktpreobuka.schoolEDiary.controllers.utils.RESTError;
 import com.iktpreobuka.schoolEDiary.entities.AddressEntity;
@@ -40,7 +39,9 @@ import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.SubjectRepository;
 import com.iktpreobuka.schoolEDiary.repositories.TeacherRepository;
 import com.iktpreobuka.schoolEDiary.repositories.UserRepository;
-import com.iktpreobuka.schoolEDiary.services.FileHandler;
+import com.iktpreobuka.schoolEDiary.services.GradeRecordDAOImpl;
+import com.iktpreobuka.schoolEDiary.services.StudentDAOImpl;
+import com.iktpreobuka.schoolEDiary.services.TeacherDAOImpl;
 
 @RestController
 @RequestMapping(value = "/api/v1/schoolEDiary/admin") // api application program interface
@@ -72,6 +73,15 @@ public class AdminController {
 	@Autowired
 	private SchoolClassRepository schoolClassRepository;
 
+	@Autowired
+	private TeacherDAOImpl teacherDAOImpl;
+
+	@Autowired
+	private StudentDAOImpl studentDAOImpl;
+
+	@Autowired
+	private GradeRecordDAOImpl gadeRecordDAOImpl;
+
 //	@Autowired
 //	private FileHandler fileHandler;
 //	
@@ -83,6 +93,7 @@ public class AdminController {
 //	}
 
 // -- POST teacher
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/teacher")
 	public ResponseEntity<?> addTeacher(@RequestBody TeacherDTO teacher) {
 
@@ -107,13 +118,13 @@ public class AdminController {
 			subjects.add(subjectRepository.findByName(subject).get());
 		}
 
-//		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
-//		for (String schoolClass : teacher.getClasses()) {
-//			if (schoolClassRepository.findByName(schoolClass).get() == null) {
-//				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
-//			}
-//			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
-//		}
+		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
+		for (String schoolClass : teacher.getClasses()) {
+			if (schoolClassRepository.findByName(schoolClass).get() == null) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+			}
+			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
+		}
 
 		TeacherEntity newTeacher = new TeacherEntity();
 
@@ -123,12 +134,10 @@ public class AdminController {
 		newTeacher.setFirstName(teacher.getFirstName());
 		newTeacher.setLastName(teacher.getLastName());
 		newTeacher.setSubjects(subjects);
-//		newTeacher.setClasses(schoolClasses);
+		newTeacher.setClasses(schoolClasses);
 
 		return new ResponseEntity<TeacherEntity>(teacherRepository.save(newTeacher), HttpStatus.OK);
 	}
-	// Da li u AdminController pisem POST za svaki tip usera posebno ili da napravim
-	// jednu metodu koja ce moci da prepozna tip?
 
 	// --POST Student
 
@@ -149,7 +158,9 @@ public class AdminController {
 		if (schoolClass == null) {
 			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school class."), HttpStatus.BAD_REQUEST);
 		}
-
+		
+		if (schoolYear.getYear() != (schoolClass.getName()).charAt(0))
+		// TODO: proveri da li pasvord postoji?!
 		// check for matching password and repeatedPassword
 		if (!student.getPassword().equals(student.getRepeatedPassword())) {
 			return new ResponseEntity<RESTError>(new RESTError(555, "Passwords not matching"), HttpStatus.FORBIDDEN);
@@ -177,6 +188,7 @@ public class AdminController {
 			if (studentRepository.findByUsername(childUsername).get() == null) {
 				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
 				// TODO anotacija za validaciju null
+				// TODO: proveri da li pasvord postoji?!
 			}
 			children.add(studentRepository.findByUsername(childUsername).get());
 		}
@@ -220,23 +232,6 @@ public class AdminController {
 		return new ResponseEntity<SchoolYearEntity>(schoolYearRepository.save(newSchoolYear), HttpStatus.OK);
 
 	}
-
-	@RequestMapping(method = RequestMethod.DELETE, value = "/teacher/{id}")
-	public ResponseEntity<?> removeTeracher(@PathVariable Integer id) {
-		TeacherEntity teacher = teacherRepository.findById(id).get();
-		teacherRepository.delete(teacher);
-		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
-
-	}
-
-	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
-	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
-		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
-		schoolYearRepository.delete(schoolYear);
-		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
-
-	}
-
 	// --POST subject
 
 	@RequestMapping(method = RequestMethod.POST, value = "/subject")
@@ -274,55 +269,160 @@ public class AdminController {
 
 	}
 
-	//Ne radi!!
-	@RequestMapping(method = RequestMethod.PUT, value = "/teacher/{id}")
-	public ResponseEntity<?> addClassToTeacher(@RequestBody List<String> className, @PathVariable Integer id) {
-		
-	Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
-		for (String schoolClass : className) {
-			if (schoolClassRepository.findByName(schoolClass).get() == null) {
-				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
-			}
-			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
-		}
-		
-		TeacherEntity teacher = teacherRepository.findById(id).get();
-		teacher.setClasses(schoolClasses);
-		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
+	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
+	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
+		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
+		schoolYearRepository.delete(schoolYear);
+		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
 	}
-	// TODO: match schoolClass - schoolYear, schoolClassStudent
 
-//	@RequestMapping(method = RequestMethod.PUT, value = "/teacher/{id}")
-//	public ResponseEntity<?> teacherUpdate(@RequestBody TeacherEntity updatedTeacher, @PathVariable Integer id) {
-//		try {
-//			if (teacherRepository.existsById(updatedTeacher.getId())) {
-//				TeacherEntity teacherEntity = teacherRepository.findById(updatedTeacher.getId()).get();
-//				if (updatedTeacher.getFirstName() != null) {
-//					teacherEntity.setFirstName(updatedTeacher.getFirstName());
-//				}
-//				if (updatedTeacher.getLastName() != null) {
-//					teacherEntity.setLastName(updatedTeacher.getLastName());
-//				}
-//				if (updatedTeacher.getEmail() != null) {
-//					teacherEntity.setEmail(updatedTeacher.getEmail());
-//				}
-//				if (updatedTeacher.getUsername() != null) {
-//					teacherEntity.setUsername(updatedTeacher.getUsername());
-//				}
-//				teacherRepository.save(teacherEntity);
-//				return new ResponseEntity<TeacherEntity>(teacherEntity, HttpStatus.OK);
+	@RequestMapping(method = RequestMethod.DELETE, value = "/teacher/{id}")
+	public ResponseEntity<?> removeTeracher(@PathVariable String username) {
+		TeacherEntity deletedTeacher = teacherRepository.findByUsername(username).get();
+		if (deletedTeacher == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Student not found."), HttpStatus.NOT_FOUND);
+		}
+		teacherDAOImpl.removeTeacherEntity(username);
+		return new ResponseEntity<TeacherEntity>(deletedTeacher, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/parent/{id}")
+	public ResponseEntity<?> removeParent(@PathVariable String username) {
+		ParentEntity parent = parentRepository.findByUsername(username).get();
+		if (parent == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Parent not found."), HttpStatus.NOT_FOUND);
+		}
+		parentRepository.delete(parent);// Radi ali ne ispisuje sta je obriso i teba provera da li taj roditelj
+										// postoji!!
+		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/student/{username}")
+	public ResponseEntity<?> removeStudent(@PathVariable String username) {
+		StudentEntity student = studentRepository.findByUsername(username).get();
+		if (student == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Student not found."), HttpStatus.NOT_FOUND);
+		}
+		studentDAOImpl.removeStudentEntity(student.getId());
+		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/subject/{id}")
+	public ResponseEntity<?> removeSubject(@PathVariable String subjectName) {
+		SubjectEntity subject = subjectRepository.findByName(subjectName).get();
+		if (subject == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found."), HttpStatus.NOT_FOUND);
+		}
+		subjectRepository.delete(subject);
+		return new ResponseEntity<SubjectEntity>(subject, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, value = "/grade/{id}")
+	public ResponseEntity<?> removeGrade(@PathVariable Integer id) {
+		GradeRecordEntity grade = gradeRepository.findById(id).get();
+		if (grade == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Grade not found."), HttpStatus.NOT_FOUND);
+		}
+		gradeRepository.delete(grade);
+		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
+	}
+
+//TODO PUT
+
+	// Ne radi!!
+//	@RequestMapping(method = RequestMethod.PUT, value = "/teachersClasses/{teacherId}")
+//	public ResponseEntity<?> changeClassesToTeacher(@RequestBody TeacherDTO teacher, @PathVariable Integer teacherId) {
+//
+//		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
+//		for (String schoolClass : teacher.getClasses()) {
+//			if (schoolClassRepository.findByName(schoolClass).get() == null) {
+//				return new ResponseEntity<RESTError>(new RESTError(404, "Classes not found."), HttpStatus.NOT_FOUND);
 //			}
-//			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
-//		} catch (Exception e) {
-//			return new ResponseEntity<RESTError>(new RESTError(500, "Exception occurred:" + e.getMessage()),
-//					HttpStatus.INTERNAL_SERVER_ERROR);
-//			// Da li treba Exception svuda da stavljam? i da li je u redu ovo 500??
-//			// Kako da dodam listu predmeta i listu odeljenja??
+//			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
 //		}
+//
+//		TeacherEntity updatedTeacher = teacherRepository.findById(teacherId).get();
+//		updatedTeacher.setClasses(schoolClasses);
+//		return new ResponseEntity<TeacherEntity>(updatedTeacher, HttpStatus.OK);
 //	}
 
+//	@RequestMapping(method = RequestMethod.PUT, value = "/teachersClasses/{teacherId}")
+//	public ResponseEntity<?> changeSubjectsToTeacher(@RequestBody TeacherDTO teacher, @PathVariable Integer teacherId) {
+//
+//		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
+//		for (String schoolClass : teacher.getClasses()) {
+//			if (schoolClassRepository.findByName(schoolClass).get() == null) {
+//				return new ResponseEntity<RESTError>(new RESTError(404, "Classes not found."), HttpStatus.NOT_FOUND);
+//			}
+//			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
+//		}
+//
+//		TeacherEntity updatedTeacher = teacherRepository.findById(teacherId).get();
+//		updatedTeacher.setClasses(schoolClasses);
+//		return new ResponseEntity<TeacherEntity>(updatedTeacher, HttpStatus.OK);
+//	}
+
+	// TODO: match schoolClass - schoolYear, schoolClassStudent
+	@RequestMapping(method = RequestMethod.PUT, value = "/parentsChildren/{parentId}")
+	public ResponseEntity<?> addStudentsToParent(@RequestBody List<String> childrenUsernames,
+			@PathVariable Integer parentId) {
+		ParentEntity parent = parentRepository.findById(parentId).get();
+		Set<StudentEntity> children = new HashSet<StudentEntity>();
+		for (String childUsername : childrenUsernames) {
+			if (studentRepository.findByUsername(childUsername).get() == null) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+				// TODO anotacija za validaciju null
+			}
+			children.add(studentRepository.findByUsername(childUsername).get());
+		}
+
+		return new ResponseEntity<Set<StudentEntity>>(children, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT, value = "/teacher/{id}")
+	public ResponseEntity<?> teacherUpdate(@RequestBody TeacherDTO updatedTeacher, @PathVariable Integer id) {
+		try {
+			if (teacherRepository.existsById(updatedTeacher.getId())) {
+				TeacherEntity teacherEntity = teacherRepository.findById(updatedTeacher.getId()).get();
+				if (updatedTeacher.getFirstName() != null) {
+					teacherEntity.setFirstName(updatedTeacher.getFirstName());
+				}
+				if (updatedTeacher.getLastName() != null) {
+					teacherEntity.setLastName(updatedTeacher.getLastName());
+				}
+				if (updatedTeacher.getEmail() != null) {
+					teacherEntity.setEmail(updatedTeacher.getEmail());
+				}
+				if (updatedTeacher.getUsername() != null) {
+					teacherEntity.setUsername(updatedTeacher.getUsername());
+				}
+				if (updatedTeacher.getClasses() != null) {
+					Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
+					for (String schoolClass : updatedTeacher.getClasses()) {
+						schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
+					}
+				}
+				if (!updatedTeacher.getPassword().equals(updatedTeacher.getRepeatedPassword())) {
+					return new ResponseEntity<RESTError>(new RESTError(441, "Passwords not matching"),
+							HttpStatus.FORBIDDEN);
+				}
+				if (updatedTeacher.getPassword() != null) {
+					teacherEntity.setPassword(updatedTeacher.getPassword());
+
+				}
+
+				teacherRepository.save(teacherEntity);
+				return new ResponseEntity<TeacherEntity>(teacherEntity, HttpStatus.OK);
+			}
+			return new ResponseEntity<RESTError>(new RESTError(400, "Teacher not found"), HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<RESTError>(new RESTError(500, "Exception occurred:" + e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	@RequestMapping(method = RequestMethod.PUT, value = "/student/{id}")
-	public ResponseEntity<?> studentUpdate(@RequestBody StudentEntity updatedStudent, @PathVariable Integer id) {
+	public ResponseEntity<?> studentUpdate(@RequestBody StudentDTO updatedStudent, @PathVariable Integer id) {
 		try {
 			if (teacherRepository.existsById(updatedStudent.getId())) {
 				StudentEntity studentEntity = studentRepository.findById(updatedStudent.getId()).get();
@@ -338,13 +438,25 @@ public class AdminController {
 				if (updatedStudent.getUsername() != null) {
 					studentEntity.setUsername(updatedStudent.getUsername());
 				}
-//				if (updatedStudent.getDateOfBirth() != null) {
-//					studentEntity.setDateOfBirth(updatedStudent.getDateOfBirth());
-//				}
+				if (updatedStudent.getYear() != null) {
+					studentEntity.setSchoolYear(schoolYearRepository.findByYear(updatedStudent.getYear()));
+				}
+				if (updatedStudent.getSchoolClass() != null) {
+					studentEntity
+							.setSchoolClass(schoolClassRepository.findByName(updatedStudent.getSchoolClass()).get());
+				}
+				if (!updatedStudent.getPassword().equals(updatedStudent.getRepeatedPassword())) {
+					return new ResponseEntity<RESTError>(new RESTError(441, "Passwords not matching"),
+							HttpStatus.FORBIDDEN);
+				}
+				if (updatedStudent.getPassword() != null) {
+					studentEntity.setPassword(updatedStudent.getPassword());
+				}
+
 				studentRepository.save(studentEntity);
 				return new ResponseEntity<StudentEntity>(studentEntity, HttpStatus.OK);
 			}
-			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(400, "Student not found"), HttpStatus.NOT_FOUND);
 		} catch (Exception e) {
 			return new ResponseEntity<RESTError>(new RESTError(500, "Exception occurred:" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
@@ -352,7 +464,7 @@ public class AdminController {
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/parent/{id}")
-	public ResponseEntity<?> parentUpdate(@RequestBody ParentEntity updatedParent, @PathVariable Integer id) {
+	public ResponseEntity<?> parentUpdate(@RequestBody ParentDTO updatedParent, @PathVariable Integer id) {
 		try {
 			if (teacherRepository.existsById(updatedParent.getId())) {
 				ParentEntity parentEntity = parentRepository.findById(updatedParent.getId()).get();
@@ -368,6 +480,22 @@ public class AdminController {
 				if (updatedParent.getUsername() != null) {
 					parentEntity.setUsername(updatedParent.getUsername());
 				}
+				
+				if (updatedParent.getChildUsernames() != null) {
+					Set<StudentEntity> children = new HashSet<StudentEntity>();
+					for (String child : updatedParent.getChildUsernames()) {
+						children.add(studentRepository.findByUsername(child).get());
+					}
+				}
+				
+				if (!updatedParent.getPassword().equals(updatedParent.getRepeatedPassword())) {
+					return new ResponseEntity<RESTError>(new RESTError(441, "Passwords not matching"),
+							HttpStatus.FORBIDDEN);
+				}
+				if (updatedParent.getPassword() != null) {
+					parentEntity.setPassword(updatedParent.getPassword());
+				}
+
 				parentRepository.save(parentEntity);
 				return new ResponseEntity<ParentEntity>(parentEntity, HttpStatus.OK);
 			}
@@ -375,7 +503,7 @@ public class AdminController {
 		} catch (Exception e) {
 			return new ResponseEntity<RESTError>(new RESTError(500, "Exception occurred:" + e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
-		} // Dodati Lisu djaka.
+		}
 	}
 
 	@RequestMapping(method = RequestMethod.PUT, value = "/changePassword/{id}")
@@ -414,7 +542,7 @@ public class AdminController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
+	@RequestMapping(method = RequestMethod.POST, value = "/grade")
 	public ResponseEntity<?> addGradeToStudent(@RequestBody GradeDTO grade) {
 //			if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
 //			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
@@ -422,10 +550,17 @@ public class AdminController {
 //		}
 		StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
 		if (student == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
-		//TODO validacija
+		if (subject == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
+		}
+		if (!gadeRecordDAOImpl.checkIfStudentListensSubject(subject.getName()).contains(student)) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Student does not listen the subject."),
+					HttpStatus.BAD_REQUEST);
+		}
+		// TODO validacija
 		GradeRecordEntity newGrade = new GradeRecordEntity();
 		newGrade.setGradeType(grade.getGradeType());
 		newGrade.setName(grade.getName());
@@ -457,5 +592,69 @@ public class AdminController {
 //	}
 
 	// GET Predmeta Nastavnika Učenika Roditelja Ocena
-	// DELETE Predmeta Nastavnika Učenika Roditelja Ocena
+
+	@RequestMapping(method = RequestMethod.GET, value = "/teacher/{username}")
+	public ResponseEntity<?> getTeracher(@PathVariable String username) {
+		TeacherEntity teacher = teacherRepository.findByUsername(username).get();
+		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/teacher")
+	public ResponseEntity<?> getAllTerachers() {
+		List<TeacherEntity> teacher = (List<TeacherEntity>) teacherRepository.findAll();
+		return (ResponseEntity<?>) teacher;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/parent/{username}")
+	public ResponseEntity<?> getParent(@PathVariable String username) {
+		ParentEntity parent = parentRepository.findByUsername(username).get();// vidi da li treba da bude optional u
+		// parentRepository
+		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/parent")
+	public ResponseEntity<?> getAllParents() {
+		List<ParentEntity> parent = (List<ParentEntity>) parentRepository.findAll();
+		return (ResponseEntity<?>) parent;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/student/{username}")
+	public ResponseEntity<?> getStudent(@PathVariable String username) {
+		StudentEntity student = studentRepository.findByUsername(username).get();
+		studentRepository.delete(student);
+		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/student")
+	public ResponseEntity<?> getAllStudents() {
+		List<StudentEntity> student = (List<StudentEntity>) studentRepository.findAll();
+		return (ResponseEntity<?>) student;
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/subject/{name}")
+	public ResponseEntity<?> getSubject(@PathVariable String name) {
+		SubjectEntity subject = subjectRepository.findByName(name).get();
+		return new ResponseEntity<SubjectEntity>(subject, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/subject")
+	public ResponseEntity<?> getAllSubjects(@PathVariable Integer id) {
+		SubjectEntity subject = subjectRepository.findById(id).get();
+		subjectRepository.delete(subject);
+		return new ResponseEntity<SubjectEntity>(subject, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/grade/{id}")
+	public ResponseEntity<?> getGrade(@PathVariable Integer id) {
+		GradeRecordEntity grade = gradeRepository.findById(id).get();
+		gradeRepository.delete(grade);
+		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/grade")
+	public ResponseEntity<?> getAllGrades(@PathVariable Integer id) {
+		GradeRecordEntity grade = gradeRepository.findById(id).get();
+		gradeRepository.delete(grade);
+		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
+	}
 }

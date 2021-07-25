@@ -15,6 +15,7 @@ public class StudentDTO extends UserDTO{
 		// TODO Auto-generated constructor stub
 	}
 
+		
 //	public String getParentUsername() {
 //		return parentUsername;
 //	}
@@ -23,6 +24,7 @@ public class StudentDTO extends UserDTO{
 //		this.parentUsername = parentUsername;
 //	}
 
+	
 	public String getSchoolClass() {
 		return schoolClass;
 	}

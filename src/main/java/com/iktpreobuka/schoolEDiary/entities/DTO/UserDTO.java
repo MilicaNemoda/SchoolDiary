@@ -1,5 +1,7 @@
 package com.iktpreobuka.schoolEDiary.entities.DTO;
 
+import com.iktpreobuka.schoolEDiary.entities.RoleEntity;
+
 public class UserDTO {
 	private Integer id;
 	private String firstName;
@@ -8,10 +10,18 @@ public class UserDTO {
 	private String email;
 	private String password;
 	private String repeatedPassword;
-	
+	private RoleEntity role;
+	private String token;
+
 	public UserDTO() {
 		super();
 		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String toString() {
+		return "UserDTO [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", username=" + username
+				+ ", email=" + email + ", role=" + role + "]";
 	}
 
 	public Integer getId() {
@@ -69,5 +79,21 @@ public class UserDTO {
 	public void setRepeatedPassword(String repeatedPassword) {
 		this.repeatedPassword = repeatedPassword;
 	}
-	
+
+	public RoleEntity getRole() {
+		return role;
+	}
+
+	public void setRole(RoleEntity role) {
+		this.role = role;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}	
+
 }
