@@ -47,30 +47,39 @@ public class TeacherController {
 	@Autowired
 	TeacherDAOImpl teacherDAOImpl;
 
-	@RequestMapping(method = RequestMethod.PUT, value = "/{teacherId}/grade")
+	@RequestMapping(method = RequestMethod.POST, value = "/{teacherId}/grade")
 	public ResponseEntity<?> addGradeToStudent(@PathVariable Integer teacherId, @RequestBody GradeDTO grade) {
 
 		TeacherEntity teacher = teacherRepository.findById(teacherId).get();
+		if (teacher == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Teacher not found"), HttpStatus.NOT_FOUND);
+		}
 		StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
 		if (student == null) {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
-		// TODO: validacija
+		if (subject == null) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Subject not found"), HttpStatus.NOT_FOUND);
+		}
 		if (!gradeRecordDAOImpl.findStudentBySubjectAndTeacher(grade.getSubjectName(), teacher.getUsername())
 				.contains(student)) {
 			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
-					HttpStatus.BAD_REQUEST);
+					HttpStatus.BAD_REQUEST);//stavi bolju poruku
 		}
 		GradeRecordEntity newGrade = new GradeRecordEntity();
 		newGrade.setGradeType(grade.getGradeType());
 		newGrade.setName(grade.getName());
+		newGrade.setGrade(grade.getGrade());
 		newGrade.setStudentGrade(student);
 		newGrade.setSubjectGrade(subject);
 		newGrade.setTeacherGrade(teacher);
 		gradeRepository.save(newGrade);
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
 	}
+	//Put grade
+	//Delete grade
+	
 
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
 	public ResponseEntity<?> getTeachersStudentsBySubject(@RequestParam String teacherUsername,
@@ -80,12 +89,13 @@ public class TeacherController {
 		}
 		if (subjectRepository.findByName(subjectName) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
-		}		
-		if (teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName) == null) {
-			return new ResponseEntity<RESTError>
-			(new RESTError(404, "There arn't students for that teacher and subject."), HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName), HttpStatus.OK);
+		if (teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName) == null) {
+			return new ResponseEntity<RESTError>(
+					new RESTError(404, "There arn't students for that teacher and subject."), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<Set<StudentEntity>>(
+				teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName), HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/allStudents")
@@ -94,10 +104,11 @@ public class TeacherController {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
 		}
 		if (teacherDAOImpl.findAllTeachersStudents(teacherUsername) == null) {
-			return new ResponseEntity<RESTError>
-			(new RESTError(404, "There arn't students for that teacher."), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "There arn't students for that teacher."),
+					HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllTeachersStudents(teacherUsername), HttpStatus.OK);
+		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllTeachersStudents(teacherUsername),
+				HttpStatus.OK);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
@@ -105,6 +116,7 @@ public class TeacherController {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Set<SubjectEntity>>(teacherDAOImpl.findAllTeachersSubjects(teacherUsername), HttpStatus.OK);
+		return new ResponseEntity<Set<SubjectEntity>>(teacherDAOImpl.findAllTeachersSubjects(teacherUsername),
+				HttpStatus.OK);
 	}
 }

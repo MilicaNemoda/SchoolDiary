@@ -27,6 +27,8 @@ public class GradeRecordEntity {
 	@Column(nullable = false)
 	private String name;
 	@Column(nullable = false)
+	private Integer grade;
+	@Column(nullable = false)
 	private EGradeType gradeType;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
@@ -93,5 +95,14 @@ public class GradeRecordEntity {
 	public void setTeacherGrade(TeacherEntity teacherGrade) {
 		this.teacherGrade = teacherGrade;
 	}
+
+	public Integer getGrade() {
+		return grade;
+	}
+
+	public void setGrade(Integer grade) {
+		this.grade = grade;
+	}
+	
 	
 }

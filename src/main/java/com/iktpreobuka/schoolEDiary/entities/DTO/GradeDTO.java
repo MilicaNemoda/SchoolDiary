@@ -5,6 +5,7 @@ import helper.EGradeType;
 public class GradeDTO {
 	private Integer id;
 	private String name;
+	private Integer grade;
 	private EGradeType gradeType;
 	private String studentUsername;
 	private String subjectName;
@@ -53,5 +54,15 @@ public class GradeDTO {
 	public void setSubjectName(String subjectName) {
 		this.subjectName = subjectName;
 	}
+
+	public Integer getGrade() {
+		return grade;
+	}
+
+	public void setGrade(Integer grade) {
+		this.grade = grade;
+	}
+	
+	
 	
 }
