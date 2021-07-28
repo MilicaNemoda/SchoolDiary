@@ -1,14 +1,17 @@
 package com.iktpreobuka.schoolEDiary.entities.DTO;
 
-public class SubjectDTO {
+import javax.validation.constraints.NotNull;
 
+public class SubjectDTO {
+	@NotNull(message = "Name of subject must be provided.")
 	private String name;
+	@NotNull(message = "Weekly number of lectures must be provided.")
 	private Integer weeklyNumberOfLectures;
+	@NotNull(message = "School year must be provided.")
 	private Integer year;
 	
 	public SubjectDTO() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public String getName() {

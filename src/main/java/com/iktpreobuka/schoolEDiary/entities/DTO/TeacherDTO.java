@@ -3,9 +3,12 @@ package com.iktpreobuka.schoolEDiary.entities.DTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TeacherDTO extends UserDTO {
+import javax.validation.constraints.NotNull;
 
+public class TeacherDTO extends UserDTO {
+	@NotNull(message = "School class must be provided.")
 	private List<String> classes = new ArrayList<String>();
+	@NotNull(message = "School subject must be provided.")
 	protected List<String> subjects = new ArrayList<String>();
 
 	public List<String> getClasses() {

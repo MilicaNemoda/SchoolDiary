@@ -34,7 +34,7 @@ public class TeacherDAOImpl implements TeacherDAO  {
 	@Autowired
 	StudentRepository studentRepository;
 	
-	@Transactional
+//	@Transactional //TODO da li je potrebna ova anotacija??
 	public void removeTeacherEntity(String username){
 		TeacherEntity deletedTeacher = teacherRepository.findByUsername(username).get();
 		

@@ -1,11 +1,13 @@
 package com.iktpreobuka.schoolEDiary.controllers;
 
-import java.util.List;
 import java.util.Set;
+
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.schoolEDiary.controllers.utils.RESTError;
 import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
+import com.iktpreobuka.schoolEDiary.entities.ParentEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
 import com.iktpreobuka.schoolEDiary.entities.SubjectEntity;
 import com.iktpreobuka.schoolEDiary.entities.TeacherEntity;
@@ -47,8 +50,9 @@ public class TeacherController {
 	@Autowired
 	TeacherDAOImpl teacherDAOImpl;
 
+	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.POST, value = "/{teacherId}/grade")
-	public ResponseEntity<?> addGradeToStudent(@PathVariable Integer teacherId, @RequestBody GradeDTO grade) {
+	public ResponseEntity<?> addGradeToStudent(@PathVariable Integer teacherId, @Valid @RequestBody GradeDTO grade) {
 
 		TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 		if (teacher == null) {
@@ -69,18 +73,22 @@ public class TeacherController {
 		}
 		GradeRecordEntity newGrade = new GradeRecordEntity();
 		newGrade.setGradeType(grade.getGradeType());
-		newGrade.setName(grade.getName());
 		newGrade.setGrade(grade.getGrade());
 		newGrade.setStudentGrade(student);
 		newGrade.setSubjectGrade(subject);
 		newGrade.setTeacherGrade(teacher);
 		gradeRepository.save(newGrade);
+		
+//		ParentEntity parent = gradeRecordDAOImpl.findParentOfStudentGotGrade(newGrade.getId());
+//		// zelis da ostane lista roditelja ili da salje samo jednom roditelju?
+//		parent.getEmail();
+		
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
 	}
 	//Put grade
 	//Delete grade
 	
-
+	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
 	public ResponseEntity<?> getTeachersStudentsBySubject(@RequestParam String teacherUsername,
 			@RequestParam String subjectName) {
@@ -98,6 +106,7 @@ public class TeacherController {
 				teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName), HttpStatus.OK);
 	}
 
+	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/allStudents")
 	public ResponseEntity<?> getTeachersStudents(@RequestParam String teacherUsername) {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {
@@ -111,6 +120,7 @@ public class TeacherController {
 				HttpStatus.OK);
 	}
 
+	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
 	public ResponseEntity<?> getTeachersSubjects(@RequestParam String teacherUsername) {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {

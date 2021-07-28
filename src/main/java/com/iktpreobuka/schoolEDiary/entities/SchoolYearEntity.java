@@ -11,6 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -23,6 +26,9 @@ public class SchoolYearEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer id;
+	@NotNull(message = "Year must be provided.")
+	@Min(value=1, message="School year must be 1 or higher!")
+	@Max(value=8, message="School year must be 8 or less!")
 	@Column(nullable = false)
 	private Integer year;
 //	@Column(nullable = false)

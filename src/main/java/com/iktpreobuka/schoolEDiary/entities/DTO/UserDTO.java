@@ -1,21 +1,34 @@
 package com.iktpreobuka.schoolEDiary.entities.DTO;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 import com.iktpreobuka.schoolEDiary.entities.RoleEntity;
+
 
 public class UserDTO {
 	private Integer id;
+	@NotNull(message = "First name must be provided.")
 	private String firstName;
+	@NotNull(message = "Last name must be provided.")
 	private String lastName;
+	@NotNull(message = "Username must be provided.")
 	private String username;
+	@NotNull(message = "Email must be provided.")
+	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$",
+	message="Email is not valid.")
 	private String email;
+	@NotNull(message = "Password must be provided.")
 	private String password;
+	@NotNull(message = "Confirm password must be provided.")
 	private String repeatedPassword;
+	@NotNull(message = "Role must be provided.")
 	private RoleEntity role;
 	private String token;
 
 	public UserDTO() {
 		super();
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	@Override

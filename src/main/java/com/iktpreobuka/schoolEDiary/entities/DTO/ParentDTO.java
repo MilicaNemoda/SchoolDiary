@@ -2,12 +2,14 @@ package com.iktpreobuka.schoolEDiary.entities.DTO;
 
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 public class ParentDTO extends UserDTO {
+	@NotNull(message = "Child usrename must be provided.")
 	List <String> childUsernames;
 
 	public ParentDTO() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public List<String> getChildUsernames() {

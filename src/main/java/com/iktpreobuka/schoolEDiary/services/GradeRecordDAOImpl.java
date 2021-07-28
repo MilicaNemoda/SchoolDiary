@@ -11,7 +11,9 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.schoolEDiary.entities.ParentEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
+import com.iktpreobuka.schoolEDiary.repositories.ParentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.SubjectRepository;
 import com.iktpreobuka.schoolEDiary.repositories.TeacherRepository;
@@ -30,6 +32,9 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 	@Autowired
 	StudentRepository studentRepository;
 
+	@Autowired
+	ParentRepository parentRepository;
+	
 	@Override
 	public Set<StudentEntity> findStudentBySubjectAndTeacher(String subjectName, String teacherUsername) {
 
@@ -52,12 +57,13 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 				return students;
 	}
 	
+	@Override
 	public Set<StudentEntity> checkIfStudentListensSubject(String subjectName){
 		Integer subjectId = subjectRepository.findByName(subjectName).get().getId();
 				
 		String sql =  "select s.id from student_entity s, subject_entity sb "
 				+ "where s.school_year_student = sb.school_year_subject and " 
-				+ "subject_id = " + subjectId;
+				+ "sb.id = " + subjectId;
 									
 				Query query = em.createNativeQuery(sql);
 				List<Integer> result = query.getResultList();
@@ -69,4 +75,23 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 									
 				return students;
 	}
+	
+	@Override
+	public Set<ParentEntity> findParentOfStudentGotGrade(Integer gradeId){
+		
+			String sql =  "select ps.parent_id from parent_student ps, grade_record_entity g "
+				+ "where ps.student_id = g.student_grade and g.id = " + gradeId;
+									
+				Query query = em.createNativeQuery(sql);
+				List<Integer> result = query.getResultList();
+				
+				Set<ParentEntity> parents = new HashSet<ParentEntity>();
+				for (Integer parentId : result) {
+					parents.add(parentRepository.findById(parentId).get());
+					}
+									
+				return parents;
+	}
+	
+	
 }

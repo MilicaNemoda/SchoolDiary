@@ -1,34 +1,22 @@
 package com.iktpreobuka.schoolEDiary.entities.DTO;
 
+import javax.validation.constraints.NotNull;
+
 import helper.EGradeType;
 
 public class GradeDTO {
-	private Integer id;
-	private String name;
+	@NotNull(message = "Grade must be provided.")
 	private Integer grade;
+	@NotNull(message = "Grade type name must be provided.")
 	private EGradeType gradeType;
+	@NotNull(message = "Student's username must be provided.")
 	private String studentUsername;
+	@NotNull(message = "Subject must be provided.")
 	private String subjectName;
 	
 	public GradeDTO() {
 		super();
 		// TODO Auto-generated constructor stub
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public EGradeType getGradeType() {

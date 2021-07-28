@@ -17,6 +17,10 @@ import javax.persistence.ManyToOne;
 
 import helper.EGradeType;
 
+/**
+ * Ovaj entity predstavlja ocenu i kao takav sadrzi naziv ocene, studenta kome
+ * je data, predmet i profesora koji dodeljuje ocenu.
+ */
 @Entity
 public class GradeRecordEntity {
 	@Id
@@ -25,24 +29,23 @@ public class GradeRecordEntity {
 //	@JsonProperty("ID")
 	private Integer id;
 	@Column(nullable = false)
-	private String name;
-	@Column(nullable = false)
 	private Integer grade;
 	@Column(nullable = false)
 	private EGradeType gradeType;
-
+	
+	//TODO promeni nazive kolona da budu razumljivija!!!
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentGrade")
 	private StudentEntity studentGrade;
-	
+
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "subjectGrade")
 	private SubjectEntity subjectGrade;
-	
+
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "teacherGrade")
 	private TeacherEntity teacherGrade;
-	
+
 	public GradeRecordEntity() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -54,14 +57,6 @@ public class GradeRecordEntity {
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public EGradeType getGradeType() {
@@ -103,6 +98,5 @@ public class GradeRecordEntity {
 	public void setGrade(Integer grade) {
 		this.grade = grade;
 	}
-	
-	
+
 }

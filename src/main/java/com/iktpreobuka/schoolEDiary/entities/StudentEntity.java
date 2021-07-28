@@ -1,15 +1,11 @@
 package com.iktpreobuka.schoolEDiary.entities;
 
-import java.sql.Date;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -23,11 +19,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 //@DiscriminatorValue("Student")
 public class StudentEntity extends UserEntity {
-	@Column
+	
 //	@JsonView(Views.Admin.class)
 //	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
 //	@ColumnDefault(value = "0001-01-01T00:00:00")
-	private Integer yearOfBirth;
+//	private Integer yearOfBirth;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY) //promenjeno u all
 	@JoinColumn(name = "studentSchoolClass")

@@ -4,12 +4,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iktpreobuka.schoolEDiary.controllers.utils.Encryption;
 import com.iktpreobuka.schoolEDiary.controllers.utils.RESTError;
+import com.iktpreobuka.schoolEDiary.controllers.utils.UserCustomValidator;
 import com.iktpreobuka.schoolEDiary.entities.AdminEntity;
 import com.iktpreobuka.schoolEDiary.entities.UserEntity;
 import com.iktpreobuka.schoolEDiary.entities.DTO.AdminDTO;
@@ -27,9 +36,6 @@ import com.iktpreobuka.schoolEDiary.repositories.UserRepository;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // TODO : Razmisli da prebacis da bude 1 zajednicki Controller za sve klase koje extenduju UserEntity. Pa kada stigne UserDTO, da tu odlucis koji je tip, da li Teacher, Student, Admin...
 // TODO : Razmisli da renameujes ovo, mozda niej dobro da se Controller za login zove ovako? Mada je i on u materijalima
@@ -49,24 +55,33 @@ public class UserController {
 
 	@Autowired
 	AdminRepository AdminRepository;
+	
+	@Autowired
+	UserCustomValidator userValidator;
 
+	@InitBinder
+	protected void initBinder(final WebDataBinder binder) {
+		binder.addValidators(userValidator);
+	}
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	//TODO validacija, @JSON
 	@RequestMapping(method = RequestMethod.POST, path = "/login")
-	public ResponseEntity<?> login(@RequestParam("user_email") String email, @RequestParam("password") String pwd) {
-		logger.info("Received login request from user with e-mail : " + email);
-		UserEntity userEntity = userRepository.findByEmail(email).get();
+	public ResponseEntity<?> login(@RequestParam("username") String username, @RequestParam("password") String pwd) {
+		logger.info("Received login request from user with username: " + username);
+		UserEntity userEntity = userRepository.findByUsername(username).get();
 		if (userEntity != null && Encryption.validatePassword(pwd, userEntity.getPassword())) {
 			String token = getJWTToken(userEntity);
 			UserDTO user = new UserDTO();
-			user.setEmail(email);
+			user.setUsername(username);
 			user.setToken(token);
-			logger.info("Successfull login ot the user : " + userEntity.toString());
+			logger.info("Successfull login of the user : " + userEntity.toString());
 			return new ResponseEntity<>(user, HttpStatus.OK);
 		}
-		logger.info("Unsuccesfull login of user with e-mail : " + email);
+		logger.info("Unsuccesfull login of user with username: " + username);
 		return new ResponseEntity<>("Wrong credentials", HttpStatus.UNAUTHORIZED);
-	}
+	}//promenila da se umesto emailom loguje usernameom. 
 
 	/**
 	 * End-point that doesn't need authorization, so the Admin with "ROLE_ADMIN" can
@@ -77,21 +92,17 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/addAdmin")
-	public ResponseEntity<?> addAdmin(@RequestBody AdminDTO adminDTO) {
-
-		// perform check if same username is used in database
-		// !subjectRepository.findByName(newSubject.getName()).equals(null)
+	public ResponseEntity<?> addAdmin(@Valid @RequestBody UserDTO adminDTO, BindingResult result) {
+		if (result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+			} else {
+			userValidator.validate(adminDTO, result);
+			}
 		if (AdminRepository.findByUsername(adminDTO.getUsername()).isPresent()) {
 			return new ResponseEntity<RESTError>(new RESTError(440, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
 		}
-		// TODO: proveri da li pasvord postoji?!
-
-		// check for matching password and repeatedPassword
-		if (adminDTO.getPassword().equals(adminDTO.getRepeatedPassword())) {
-			return new ResponseEntity<RESTError>(new RESTError(441, "Passwords not matching"), HttpStatus.FORBIDDEN);  // TODO : Prebaci ove provere da se odradjuju u Valdidation objektu sa strane. A neke mogu da se rese i JSON anotacijama
-		}
-
+				
 		AdminEntity admin = new AdminEntity();
 
 		admin.setUsername(adminDTO.getUsername());
@@ -116,5 +127,8 @@ public class UserController {
 				.signWith(SignatureAlgorithm.HS512, this.secretKey.getBytes()).compact();
 		return "Bearer " + token;
 	}
+	
+	private String createErrorMessage(BindingResult result) {
+		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));}
 
 }
