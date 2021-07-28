@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /logs/spring-boot-logging.log
+/logs/spring-boot-logging.log.2021-07-25.0.gz

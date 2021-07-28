@@ -1,6 +1,7 @@
 package com.iktpreobuka.schoolEDiary.controllers;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.validation.Valid;
 
@@ -22,10 +23,12 @@ import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
 import com.iktpreobuka.schoolEDiary.entities.SubjectEntity;
 import com.iktpreobuka.schoolEDiary.entities.TeacherEntity;
 import com.iktpreobuka.schoolEDiary.entities.DTO.GradeDTO;
+import com.iktpreobuka.schoolEDiary.models.EmailObject;
 import com.iktpreobuka.schoolEDiary.repositories.GradeRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.SubjectRepository;
 import com.iktpreobuka.schoolEDiary.repositories.TeacherRepository;
+import com.iktpreobuka.schoolEDiary.services.EmailService;
 import com.iktpreobuka.schoolEDiary.services.GradeRecordDAOImpl;
 import com.iktpreobuka.schoolEDiary.services.TeacherDAOImpl;
 
@@ -50,6 +53,9 @@ public class TeacherController {
 	@Autowired
 	TeacherDAOImpl teacherDAOImpl;
 
+	@Autowired
+	EmailService emailService;
+
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.POST, value = "/{teacherId}/grade")
 	public ResponseEntity<?> addGradeToStudent(@PathVariable Integer teacherId, @Valid @RequestBody GradeDTO grade) {
@@ -69,7 +75,7 @@ public class TeacherController {
 		if (!gradeRecordDAOImpl.findStudentBySubjectAndTeacher(grade.getSubjectName(), teacher.getUsername())
 				.contains(student)) {
 			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
-					HttpStatus.BAD_REQUEST);//stavi bolju poruku
+					HttpStatus.BAD_REQUEST);// stavi bolju poruku
 		}
 		GradeRecordEntity newGrade = new GradeRecordEntity();
 		newGrade.setGradeType(grade.getGradeType());
@@ -78,16 +84,24 @@ public class TeacherController {
 		newGrade.setSubjectGrade(subject);
 		newGrade.setTeacherGrade(teacher);
 		gradeRepository.save(newGrade);
-		
-//		ParentEntity parent = gradeRecordDAOImpl.findParentOfStudentGotGrade(newGrade.getId());
-//		// zelis da ostane lista roditelja ili da salje samo jednom roditelju?
-//		parent.getEmail();
-		
+
+		Set<ParentEntity> parents = gradeRecordDAOImpl.findParentOfStudentGotGrade(newGrade.getId());
+		// sending e-mails to all child parents
+		for (ParentEntity parentEntity : parents) {
+			EmailObject emailObject = new EmailObject();
+			emailObject.setMailReceiver(parentEntity.getEmail());
+			emailObject.setSubject("Your child received a new school grade!");
+			emailObject.setText("Your child received " + grade.getGrade() + " from " + grade.getSubjectName()
+					+ " teeched by " + teacher.getFirstName() + " " + teacher.getLastName());
+
+			emailService.sendSimpleMessage(emailObject);
+		}
+
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
 	}
-	//Put grade
-	//Delete grade
-	
+	// Put grade
+	// Delete grade
+
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
 	public ResponseEntity<?> getTeachersStudentsBySubject(@RequestParam String teacherUsername,
