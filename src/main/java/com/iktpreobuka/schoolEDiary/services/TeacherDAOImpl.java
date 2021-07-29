@@ -34,16 +34,18 @@ public class TeacherDAOImpl implements TeacherDAO  {
 	@Autowired
 	StudentRepository studentRepository;
 	
-//	@Transactional //TODO da li je potrebna ova anotacija??
+	@Transactional
 	public void removeTeacherEntity(String username){
 		TeacherEntity deletedTeacher = teacherRepository.findByUsername(username).get();
 		
 		String sql1 = "delete from db_school_e_diary.teacher_subject where teacher_id = " + deletedTeacher.getId();
-//		String sql3="delete from db_school_e_diary.teacher_entity where id = " + id;
-		String sql4 = "delete from db_school_e_diary.teacher_class where teacher_id = " + deletedTeacher.getId();
+		String sql2= "delete from db_school_e_diary.grade_record_entity where teacher_grade = " + deletedTeacher.getId();
+		String sql3 = "delete from db_school_e_diary.teacher_class where teacher_id = " + deletedTeacher.getId();
+		String sql4="delete from db_school_e_diary.teacher_entity where id = " + deletedTeacher.getId();
 		
 		 em.createNativeQuery(sql1).executeUpdate();
-//		 em.createNativeQuery(sql3).executeUpdate();
+		 em.createNativeQuery(sql2).executeUpdate();
+		 em.createNativeQuery(sql3).executeUpdate();
 		 em.createNativeQuery(sql4).executeUpdate();
 			
 	}

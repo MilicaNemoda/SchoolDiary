@@ -17,16 +17,18 @@ public class StudentDAOImpl implements StudentDAO {
 
 	@Autowired
 	TeacherRepository teacherRepository;
-
-//	@Transactional
+	
+	@Transactional
 	public void removeStudentEntity(Integer id) {
 
 		String sql1 = "delete from db_school_e_diary.parent_student where student_id = " + id;
-//		String sql3="delete from db_school_e_diary.user_entity where id = " + id;
-		String sql4 = "delete from db_school_e_diary.student_entity where id = " + id;
+		String sql2= "delete from db_school_e_diary.grade_record_entity where student_grade = " + id;
+		String sql3 = "delete from db_school_e_diary.student_entity where id = " + id;
+		String sql4 = "delete from db_school_e_diary.user_entity where id = " + id;
 
-		em.createNativeQuery(sql1).executeUpdate();
-//		 em.createNativeQuery(sql3).executeUpdate();
+		em.createNativeQuery(sql1).executeUpdate();		
+		em.createNativeQuery(sql2).executeUpdate();
+		em.createNativeQuery(sql3).executeUpdate();
 		em.createNativeQuery(sql4).executeUpdate();
 
 	}

@@ -10,4 +10,5 @@ import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
 @Repository
 public interface GradeRepository extends CrudRepository<GradeRecordEntity, Integer> {
 	Set<GradeRecordEntity>findAllByStudentGrade(Integer id);
+
 }

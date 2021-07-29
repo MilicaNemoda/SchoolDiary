@@ -34,13 +34,13 @@ public class StudentEntity extends UserEntity {
 	private SchoolYearEntity schoolYearStudent;
 
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "Parent_Student", joinColumns = {
 			@JoinColumn(name = "Student_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Parent_id", nullable = false, updatable = false) })
 	protected Set<ParentEntity> parent = new HashSet<ParentEntity>();
 
-	@OneToMany(mappedBy = "studentGrade", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
+	@OneToMany(mappedBy = "studentGrade", fetch = FetchType.LAZY, cascade = { CascadeType.ALL })
 	private List<GradeRecordEntity> grades = new ArrayList<>();
 
 	public StudentEntity() {

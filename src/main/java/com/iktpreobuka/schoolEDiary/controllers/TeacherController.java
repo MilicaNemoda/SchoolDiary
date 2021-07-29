@@ -54,11 +54,10 @@ public class TeacherController {
 
 	@Autowired
 	TeacherDAOImpl teacherDAOImpl;
-	
+
 	@Autowired
 	EmailService emailService;
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.POST, value = "/{teacherId}/grade")
@@ -66,20 +65,20 @@ public class TeacherController {
 
 		TeacherEntity teacher = teacherRepository.findById(teacherId).get();
 		if (teacher == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Teacher not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
 		}
 		StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
 		if (student == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
 		if (subject == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Subject not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
 		}
 		if (!gradeRecordDAOImpl.findStudentBySubjectAndTeacher(grade.getSubjectName(), teacher.getUsername())
 				.contains(student)) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
-					HttpStatus.BAD_REQUEST);// stavi bolju poruku
+			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
+					HttpStatus.BAD_REQUEST);
 		}
 		GradeRecordEntity newGrade = new GradeRecordEntity();
 		newGrade.setGradeType(grade.getGradeType());
@@ -101,10 +100,76 @@ public class TeacherController {
 			emailService.sendSimpleMessage(emailObject);
 		}
 
+		logger.info("Teacher " + teacher.getUsername() + " gave grade " + newGrade.getGrade() + ", to "
+				+ student.getUsername() + " student.");
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
 	}
-	// Put grade
-	// Delete grade
+
+	@Secured("ROLE_TEACHER")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/grade")
+	public ResponseEntity<?> removeGrade(@PathVariable Integer id, @PathVariable String teachersUsername) {
+		GradeRecordEntity grade = gradeRepository.findById(id).get();
+		if (grade == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Grade not found."), HttpStatus.NOT_FOUND);
+		}
+		TeacherEntity teacher = teacherRepository.findByUsername(teachersUsername).get();
+		if (teacher == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found."), HttpStatus.NOT_FOUND);
+		}
+		if (grade.getTeacherGrade() != teacher) {
+			return new ResponseEntity<RESTError>(new RESTError(403, "The teacher can't delete the grade."),
+					HttpStatus.FORBIDDEN);
+		}
+		
+		gradeRepository.delete(grade);
+		
+		logger.info("Teacher " + teacher.getUsername() + " deleted grade " + grade.getGrade() + " of "
+				+ grade.getStudentGrade().getUsername() + " student.");
+		
+		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
+	}
+
+	@Secured("ROLE_TEACHER")
+	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
+	public ResponseEntity<?> changeGrade(@PathVariable String teachersUsername, @PathVariable Integer id,
+			@RequestBody GradeRecordEntity newGrade) {
+		if (gradeRepository.findById(id).get() == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Grade not found."), HttpStatus.NOT_FOUND);
+		}
+		TeacherEntity teacher = teacherRepository.findByUsername(teachersUsername).get();
+		if (teacher == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found."), HttpStatus.NOT_FOUND);
+		}
+		if (newGrade.getTeacherGrade() != teacher) {
+			return new ResponseEntity<RESTError>(new RESTError(403, "The teacher can't change the grade."),
+					HttpStatus.FORBIDDEN);
+		}
+
+		GradeRecordEntity grade = new GradeRecordEntity();
+
+		if (newGrade.getGrade() != null) {
+			grade.setGrade(newGrade.getGrade());
+		}
+		if (newGrade.getGradeType() != null) {
+			grade.setGradeType(newGrade.getGradeType());
+		}
+		if (newGrade.getStudentGrade() != null) {
+			grade.setStudentGrade(newGrade.getStudentGrade());
+		}
+		if (newGrade.getSubjectGrade() != null) {
+			grade.setSubjectGrade(newGrade.getSubjectGrade());
+		}
+
+		if (!gradeRecordDAOImpl.findStudentBySubjectAndTeacher(grade.getSubjectGrade().getName(), teacher.getUsername())
+				.contains(grade.getStudentGrade())) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
+					HttpStatus.BAD_REQUEST);
+		}
+		
+		logger.info("Teacher " + teacher.getUsername() + " changed grade.");
+
+		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
+	}
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
