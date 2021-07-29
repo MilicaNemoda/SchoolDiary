@@ -32,7 +32,13 @@ public class GradeRecordEntity {
 	private Integer grade;
 	@Column(nullable = false)
 	private EGradeType gradeType;
-	
+		
+	@Override
+	public String toString() {
+		return "GradeRecordEntity [id=" + id + ", grade=" + grade + ", gradeType=" + gradeType + ", studentGrade="
+				+ studentGrade + ", subjectGrade=" + subjectGrade + ", teacherGrade=" + teacherGrade + "]";
+	}
+
 	//TODO promeni nazive kolona da budu razumljivija!!!
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentGrade")

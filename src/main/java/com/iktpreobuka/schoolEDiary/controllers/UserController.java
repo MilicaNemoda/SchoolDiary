@@ -66,7 +66,6 @@ public class UserController {
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	//TODO validacija, @JSON
 	@RequestMapping(method = RequestMethod.POST, path = "/login")
 	public ResponseEntity<?> login(@RequestParam("username") String username, @RequestParam("password") String pwd) {
 		logger.info("Received login request from user with username: " + username);
@@ -81,7 +80,7 @@ public class UserController {
 		}
 		logger.info("Unsuccesfull login of user with username: " + username);
 		return new ResponseEntity<>("Wrong credentials", HttpStatus.UNAUTHORIZED);
-	}//promenila da se umesto emailom loguje usernameom. 
+	} 
 
 	/**
 	 * End-point that doesn't need authorization, so the Admin with "ROLE_ADMIN" can

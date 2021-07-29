@@ -5,6 +5,8 @@ import java.util.function.Consumer;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,9 +54,11 @@ public class TeacherController {
 
 	@Autowired
 	TeacherDAOImpl teacherDAOImpl;
-
+	
 	@Autowired
 	EmailService emailService;
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.POST, value = "/{teacherId}/grade")

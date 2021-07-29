@@ -10,6 +10,11 @@ public class TeacherDTO extends UserDTO {
 	private List<String> classes = new ArrayList<String>();
 	@NotNull(message = "School subject must be provided.")
 	protected List<String> subjects = new ArrayList<String>();
+	
+//	@Override
+//	public String toString() {
+//		return "TeacherDTO [classes=" + classes + ", subjects=" + subjects + "]";
+//	}
 
 	public List<String> getClasses() {
 		return classes;
