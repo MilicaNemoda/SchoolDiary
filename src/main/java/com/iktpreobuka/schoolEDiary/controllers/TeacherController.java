@@ -106,7 +106,7 @@ public class TeacherController {
 	}
 
 	@Secured("ROLE_TEACHER")
-	@RequestMapping(method = RequestMethod.DELETE, value = "/grade")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/grade/{id}/{teachersUsername}")
 	public ResponseEntity<?> removeGrade(@PathVariable Integer id, @PathVariable String teachersUsername) {
 		GradeRecordEntity grade = gradeRepository.findById(id).get();
 		if (grade == null) {
@@ -120,32 +120,31 @@ public class TeacherController {
 			return new ResponseEntity<RESTError>(new RESTError(403, "The teacher can't delete the grade."),
 					HttpStatus.FORBIDDEN);
 		}
-		
 		gradeRepository.delete(grade);
-		
+
 		logger.info("Teacher " + teacher.getUsername() + " deleted grade " + grade.getGrade() + " of "
 				+ grade.getStudentGrade().getUsername() + " student.");
-		
+
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}
+	}// Proradilo i ako nisam menjala, mislim da je do postmana??
 
 	@Secured("ROLE_TEACHER")
-	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
+	@RequestMapping(method = RequestMethod.PUT, value = "/grade/{id}/{teachersUsername}")
 	public ResponseEntity<?> changeGrade(@PathVariable String teachersUsername, @PathVariable Integer id,
-			@RequestBody GradeRecordEntity newGrade) {
-		if (gradeRepository.findById(id).get() == null) {
+			@RequestBody GradeDTO newGrade) {
+		GradeRecordEntity grade = gradeRepository.findById(id).get();
+		
+		if (grade == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Grade not found."), HttpStatus.NOT_FOUND);
 		}
 		TeacherEntity teacher = teacherRepository.findByUsername(teachersUsername).get();
 		if (teacher == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found."), HttpStatus.NOT_FOUND);
 		}
-		if (newGrade.getTeacherGrade() != teacher) {
+		if (newGrade.getTeacher() != null && newGrade.getTeacher() != teachersUsername) {
 			return new ResponseEntity<RESTError>(new RESTError(403, "The teacher can't change the grade."),
 					HttpStatus.FORBIDDEN);
 		}
-
-		GradeRecordEntity grade = new GradeRecordEntity();
 
 		if (newGrade.getGrade() != null) {
 			grade.setGrade(newGrade.getGrade());
@@ -153,23 +152,24 @@ public class TeacherController {
 		if (newGrade.getGradeType() != null) {
 			grade.setGradeType(newGrade.getGradeType());
 		}
-		if (newGrade.getStudentGrade() != null) {
-			grade.setStudentGrade(newGrade.getStudentGrade());
+		if (newGrade.getStudentUsername() != null) {
+			grade.setStudentGrade(studentRepository.findByUsername(newGrade.getStudentUsername()).get());
 		}
-		if (newGrade.getSubjectGrade() != null) {
-			grade.setSubjectGrade(newGrade.getSubjectGrade());
+		if (newGrade.getSubjectName() != null) {
+			grade.setSubjectGrade(subjectRepository.findByName(newGrade.getSubjectName()).get());
+
+			if (!gradeRecordDAOImpl
+					.findStudentBySubjectAndTeacher(grade.getSubjectGrade().getName(), teacher.getUsername())
+					.contains(grade.getStudentGrade())) {
+				return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
+						HttpStatus.BAD_REQUEST);
+			}
 		}
 
-		if (!gradeRecordDAOImpl.findStudentBySubjectAndTeacher(grade.getSubjectGrade().getName(), teacher.getUsername())
-				.contains(grade.getStudentGrade())) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
-					HttpStatus.BAD_REQUEST);
-		}
-		
 		logger.info("Teacher " + teacher.getUsername() + " changed grade.");
 
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}
+	}//radi
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")

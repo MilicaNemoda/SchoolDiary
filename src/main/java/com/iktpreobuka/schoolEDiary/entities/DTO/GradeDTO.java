@@ -13,6 +13,7 @@ public class GradeDTO {
 	private String studentUsername;
 	@NotNull(message = "Subject must be provided.")
 	private String subjectName;
+	private String teacher;
 	
 	public GradeDTO() {
 		super();
@@ -50,6 +51,15 @@ public class GradeDTO {
 	public void setGrade(Integer grade) {
 		this.grade = grade;
 	}
+
+	public String getTeacher() {
+		return teacher;
+	}
+
+	public void setTeacher(String teacher) {
+		this.teacher = teacher;
+	}
+	
 	
 	
 	

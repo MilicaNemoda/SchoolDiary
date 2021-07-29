@@ -55,13 +55,12 @@ public class UserEntity {
 
 	public UserEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public String toString() {
 		return "UserEntity [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", username=" + username
-				+ ", email=" + email + ", userAddress=" + userAddress + ", role=" + role + "]";
+				+ ", email=" + email + ", userAddress=" + userAddress + ", role=" + role.getName() + "]";
 	}
 
 	public Integer getId() {
