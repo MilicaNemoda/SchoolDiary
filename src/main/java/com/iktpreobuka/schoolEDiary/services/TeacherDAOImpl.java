@@ -73,7 +73,7 @@ public class TeacherDAOImpl implements TeacherDAO  {
 	
 	//Nadji sve studente nekog profesora
 	@Override
-	public Set<StudentEntity> findAllTeachersStudents(String teacherUsername) {
+	public Set<StudentEntity> findAllStudentsByTeacher(String teacherUsername) {
 		TeacherEntity teacher = teacherRepository.findByUsername(teacherUsername).get();
 						
 		String sql =  "select s.id from student_entity s, teacher_Class tc, teacher_subject ts "
@@ -92,7 +92,7 @@ public class TeacherDAOImpl implements TeacherDAO  {
 		}
 	
 	@Override
-	public Set<SubjectEntity> findAllTeachersSubjects(String teacherUsername){
+	public Set<SubjectEntity> findAllSubjectsByTeacher(String teacherUsername){
 		TeacherEntity teacher = teacherRepository.findByUsername(teacherUsername).get();
 		
 		String sql = "select subject_id from teacher_subject where teacher_id = " + teacher.getId();

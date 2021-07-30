@@ -13,5 +13,6 @@ public interface GradeRecordDAO {
 	public Set<StudentEntity> checkIfStudentListensSubject(String subjectName);
 	public Set<ParentEntity> findParentOfStudentGotGrade(Integer gradeId);
 	public Set<GradeRecordEntity> findAllGradesByStudent(String studentUsername);
+	public Set<GradeRecordEntity> findAllGradesByTeacher(String teacherUsername);
 	
 }

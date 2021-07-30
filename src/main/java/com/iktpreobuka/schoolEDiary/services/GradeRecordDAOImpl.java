@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
 import com.iktpreobuka.schoolEDiary.entities.ParentEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
+import com.iktpreobuka.schoolEDiary.entities.TeacherEntity;
 import com.iktpreobuka.schoolEDiary.repositories.GradeRepository;
 import com.iktpreobuka.schoolEDiary.repositories.ParentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
@@ -115,6 +116,21 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 				return grades;
 		}
 
+	@Override
+	public Set<GradeRecordEntity> findAllGradesByTeacher(String teacherUsername) {
+		TeacherEntity teacher = teacherRepository.findByUsername(teacherUsername).get();
+						
+		String sql =  "select id from grade_record_entity where teacher_grade = " + teacher.getId();
+									
+				Query query = em.createNativeQuery(sql);
+				List<Integer> result = query.getResultList();
+				
+				Set<GradeRecordEntity> grades = new HashSet<GradeRecordEntity>();
+				for (Integer gradeId : result) {
+					grades.add(gradeRepository.findById(gradeId).get());
+					}									
+				return grades;
+		}
 	
 	
 }

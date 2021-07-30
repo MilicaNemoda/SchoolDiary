@@ -191,11 +191,11 @@ public class TeacherController {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
 		}
-		if (teacherDAOImpl.findAllTeachersStudents(teacherUsername) == null) {
+		if (teacherDAOImpl.findAllStudentsByTeacher(teacherUsername) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "There arn't students for that teacher."),
 					HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllTeachersStudents(teacherUsername),
+		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllStudentsByTeacher(teacherUsername),
 				HttpStatus.OK);
 	}//radi
 
@@ -205,7 +205,17 @@ public class TeacherController {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<Set<SubjectEntity>>(teacherDAOImpl.findAllTeachersSubjects(teacherUsername),
+		return new ResponseEntity<Set<SubjectEntity>>(teacherDAOImpl.findAllSubjectsByTeacher(teacherUsername),
+				HttpStatus.OK);
+	}
+	
+	@Secured("ROLE_TEACHER")
+	@RequestMapping(method = RequestMethod.GET, value = "/grades")
+	public ResponseEntity<?> getTeachersGrades(@RequestParam String teacherUsername) {
+		if (teacherRepository.findByUsername(teacherUsername) == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<Set<GradeRecordEntity>>(gradeRecordDAOImpl.findAllGradesByTeacher(teacherUsername),
 				HttpStatus.OK);
 	}
 }//radi

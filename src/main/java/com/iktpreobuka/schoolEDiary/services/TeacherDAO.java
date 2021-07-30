@@ -8,6 +8,6 @@ import com.iktpreobuka.schoolEDiary.entities.SubjectEntity;
 public interface TeacherDAO {
 	public void removeTeacherEntity(String username);
 	public Set<StudentEntity> findStudentsByTeacherandSubject(String teacherUsername, String subjectName);
-	public Set<StudentEntity> findAllTeachersStudents(String teacherUsername);
-	public Set<SubjectEntity> findAllTeachersSubjects(String teacherUsername);
+	public Set<StudentEntity> findAllStudentsByTeacher(String teacherUsername);
+	public Set<SubjectEntity> findAllSubjectsByTeacher(String teacherUsername);
 }
