@@ -311,21 +311,21 @@ public class AdminController {
 		return new ResponseEntity<SchoolClassEntity>(schoolClassRepository.save(schoolClass), HttpStatus.OK);
 	}// radi
 
-//	@Secured("ROLE_ADMIN")
-//	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
-//	public ResponseEntity<?> removeSchoolClass(@PathVariable Integer id) {
-//		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
-//		schoolYearRepository.delete(schoolYear);
-//		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
-//	}
-//
-//	@Secured("ROLE_ADMIN")
-//	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
-//	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
-//		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
-//		schoolYearRepository.delete(schoolYear);
-//		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
-//	} valjda ne treba
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolClass/{id}")
+	public ResponseEntity<?> removeSchoolClass(@PathVariable Integer id) {
+		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
+		schoolYearRepository.delete(schoolYear);
+		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
+	}
+
+	@Secured("ROLE_ADMIN")
+	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
+	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
+		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
+		schoolYearRepository.delete(schoolYear);
+		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
+	} 
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/teacher/{username}")
@@ -345,9 +345,8 @@ public class AdminController {
 		if (parent == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Parent not found."), HttpStatus.NOT_FOUND);
 		}
-		parentRepository.delete(parent);// Radi ali ne ispisuje sta je obriso i teba provera da li taj roditelj
-										// postoji!!
-		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
+		parentRepository.delete(parent);// Radi ali ne ispisuje sta je obriso 
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Secured("ROLE_ADMIN")
@@ -382,43 +381,6 @@ public class AdminController {
 		gradeRepository.delete(grade);
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
 	}
-
-//TODO PUT
-
-	// Ne radi!!
-//	@RequestMapping(method = RequestMethod.PUT, value = "/teachersClasses/{teacherId}")
-//	public ResponseEntity<?> changeClassesToTeacher(@RequestBody TeacherDTO teacher, @PathVariable Integer teacherId) {
-//
-//		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
-//		for (String schoolClass : teacher.getClasses()) {
-//			if (schoolClassRepository.findByName(schoolClass).get() == null) {
-//				return new ResponseEntity<RESTError>(new RESTError(404, "Classes not found."), HttpStatus.NOT_FOUND);
-//			}
-//			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
-//		}
-//
-//		TeacherEntity updatedTeacher = teacherRepository.findById(teacherId).get();
-//		updatedTeacher.setClasses(schoolClasses);
-//		return new ResponseEntity<TeacherEntity>(updatedTeacher, HttpStatus.OK);
-//	}
-
-//	@RequestMapping(method = RequestMethod.PUT, value = "/teachersClasses/{teacherId}")
-//	public ResponseEntity<?> changeSubjectsToTeacher(@RequestBody TeacherDTO teacher, @PathVariable Integer teacherId) {
-//
-//		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
-//		for (String schoolClass : teacher.getClasses()) {
-//			if (schoolClassRepository.findByName(schoolClass).get() == null) {
-//				return new ResponseEntity<RESTError>(new RESTError(404, "Classes not found."), HttpStatus.NOT_FOUND);
-//			}
-//			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
-//		}
-//
-//		TeacherEntity updatedTeacher = teacherRepository.findById(teacherId).get();
-//		updatedTeacher.setClasses(schoolClasses);
-//		return new ResponseEntity<TeacherEntity>(updatedTeacher, HttpStatus.OK);
-//	}
-
-	// TODO: match schoolClass - schoolYear, schoolClassStudent
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/teacher/{username}")
