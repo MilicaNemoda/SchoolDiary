@@ -51,7 +51,6 @@ public class TeacherDAOImpl implements TeacherDAO  {
 	}
 	
 	//Nadji studente kojima profesor predaje odredjen predmet
-	
 	public Set<StudentEntity> findStudentsByTeacherandSubject(String teacherUsername, String subjectName) {
 		TeacherEntity teacher = teacherRepository.findByUsername(teacherUsername).get();
 		SubjectEntity subject = subjectRepository.findByName(subjectName).get();

@@ -102,7 +102,7 @@ public class TeacherController {
 		logger.info("Teacher " + teacher.getUsername() + " gave grade " + newGrade.getGrade() + ", to "
 				+ student.getUsername() + " student.");
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/grade/{id}/{teachersUsername}")
@@ -125,7 +125,7 @@ public class TeacherController {
 				+ grade.getStudentGrade().getUsername() + " student.");
 
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}// Radi
+	}
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.PUT, value = "/grade/{id}/{teachersUsername}")
@@ -165,8 +165,8 @@ public class TeacherController {
 		logger.info("Teacher " + teacher.getUsername() + " changed grade.");
 
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}// radi
-
+	}
+	
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
 	public ResponseEntity<?> getStudentsBySubject(@RequestParam String teacherUsername,
@@ -197,7 +197,7 @@ public class TeacherController {
 		}
 		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllStudentsByTeacher(teacherUsername),
 				HttpStatus.OK);
-	}//radi
+	}
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
@@ -218,4 +218,4 @@ public class TeacherController {
 		return new ResponseEntity<Set<GradeRecordEntity>>(gradeRecordDAOImpl.findAllGradesByTeacher(teacherUsername),
 				HttpStatus.OK);
 	}
-}//radi
+}

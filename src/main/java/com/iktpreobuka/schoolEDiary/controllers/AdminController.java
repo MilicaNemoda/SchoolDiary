@@ -53,7 +53,7 @@ import com.iktpreobuka.schoolEDiary.services.StudentDAOImpl;
 import com.iktpreobuka.schoolEDiary.services.TeacherDAOImpl;
 
 @RestController
-@RequestMapping(value = "/api/v1/schoolEDiary/admin") // api application program interface
+@RequestMapping(value = "/api/v1/schoolEDiary/admin") 
 public class AdminController {
 	@Autowired
 	private UserRepository userRepository;
@@ -99,7 +99,6 @@ public class AdminController {
 		binder.setValidator(UserCustomValidator);
 	}
 
-// -- POST teacher
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/teacher")
 	public ResponseEntity<?> addTeacher(@Valid @RequestBody TeacherDTO teacher, BindingResult result) {
@@ -145,11 +144,10 @@ public class AdminController {
 		return new ResponseEntity<TeacherEntity>(teacherRepository.save(newTeacher), HttpStatus.OK);
 	}
 
-	// --POST Student
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/student")
 	public ResponseEntity<?> addStudent(@Valid @RequestBody StudentDTO student, BindingResult result) {
-		
+
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		} else {
@@ -189,7 +187,6 @@ public class AdminController {
 		return new ResponseEntity<StudentEntity>(studentRepository.save(newStudent), HttpStatus.OK);
 	}
 
-	// --POST parent
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/parent")
 	public ResponseEntity<?> addParent(@Valid @RequestBody ParentDTO parent, BindingResult result) {
@@ -219,7 +216,7 @@ public class AdminController {
 		newParent.setStudent(children);
 		parentRepository.save(newParent);
 		return new ResponseEntity<ParentEntity>(newParent, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/grade")
@@ -246,20 +243,17 @@ public class AdminController {
 		gradeRepository.save(newGrade);
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
 
-	}// radi
-
-	// --POST address
-	@Secured("ROLE_ADMIN")
-	@RequestMapping(method = RequestMethod.POST, value = "/address")
-	public ResponseEntity<?> addAddress(@Valid @RequestBody AddressEntity newAddress, BindingResult result) {
-		if (addressRepository.findByStreet(newAddress.getStreet()).isPresent()) {
-			return new ResponseEntity<RESTError>(new RESTError(440, "Address already created."), HttpStatus.FORBIDDEN);
-		}
-		// promeni ovo 444, i sta bi jos moglo da se doda od validacije?
-		// proveri sta sve treba od validacije???!!!
-
-		return new ResponseEntity<AddressEntity>(addressRepository.save(newAddress), HttpStatus.OK);
 	}
+	
+//	@Secured("ROLE_ADMIN")
+//	@RequestMapping(method = RequestMethod.POST, value = "/address")
+//	public ResponseEntity<?> addAddress(@Valid @RequestBody AddressEntity newAddress, BindingResult result) {
+//		if (addressRepository.findByStreet(newAddress.getStreet()).isPresent()) {
+//			return new ResponseEntity<RESTError>(new RESTError(403, "Address already created."), HttpStatus.FORBIDDEN);
+//		}
+//		
+//		return new ResponseEntity<AddressEntity>(addressRepository.save(newAddress), HttpStatus.OK);
+//	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/schoolYear")
@@ -271,9 +265,9 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(403, "Year already created."), HttpStatus.FORBIDDEN);
 		}
 		return new ResponseEntity<SchoolYearEntity>(schoolYearRepository.save(newSchoolYear), HttpStatus.OK);
-	}// radi
+	}
 
-	// --POST subject
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/subject")
 	public ResponseEntity<?> addSubject(@Valid @RequestBody SubjectDTO subject, BindingResult result) {
@@ -294,7 +288,7 @@ public class AdminController {
 		newSubject.setSchoolYear(schoolYear);
 
 		return new ResponseEntity<SubjectEntity>(subjectRepository.save(newSubject), HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/schoolClass")
@@ -309,23 +303,30 @@ public class AdminController {
 		SchoolClassEntity schoolClass = new SchoolClassEntity();
 		schoolClass.setName(newSchoolClass.getName());
 		return new ResponseEntity<SchoolClassEntity>(schoolClassRepository.save(schoolClass), HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolClass/{id}")
 	public ResponseEntity<?> removeSchoolClass(@PathVariable Integer id) {
-		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
-		schoolYearRepository.delete(schoolYear);
-		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
+		SchoolClassEntity schoolClass = schoolClassRepository.findById(id).get();
+		if (schoolClass == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "School class not found."), HttpStatus.NOT_FOUND);
+		}
+		schoolClassRepository.delete(schoolClass);
+		return new ResponseEntity<String>(schoolClass.getName(), HttpStatus.OK);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/schoolYear/{id}")
 	public ResponseEntity<?> removeSchoolYear(@PathVariable Integer id) {
 		SchoolYearEntity schoolYear = schoolYearRepository.findById(id).get();
+		if (schoolYear == null) {
+			return new ResponseEntity<RESTError>(new RESTError(404, "School year not found."),
+					HttpStatus.NOT_FOUND);
+		}
 		schoolYearRepository.delete(schoolYear);
 		return new ResponseEntity<SchoolYearEntity>(schoolYear, HttpStatus.OK);
-	} 
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/teacher/{username}")
@@ -336,7 +337,7 @@ public class AdminController {
 		}
 		teacherDAOImpl.removeTeacherEntity(username);
 		return new ResponseEntity<TeacherEntity>(deletedTeacher, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/parent/{username}")
@@ -345,8 +346,8 @@ public class AdminController {
 		if (parent == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Parent not found."), HttpStatus.NOT_FOUND);
 		}
-		parentRepository.delete(parent);// Radi ali ne ispisuje sta je obriso 
-		return new ResponseEntity<>(HttpStatus.OK);
+		parentRepository.delete(parent);
+		return new ResponseEntity<String>(parent.getUsername(), HttpStatus.OK);
 	}
 
 	@Secured("ROLE_ADMIN")
@@ -358,7 +359,7 @@ public class AdminController {
 		}
 		studentDAOImpl.removeStudentEntity(student.getId());
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/subject/{id}")
@@ -429,7 +430,7 @@ public class AdminController {
 			return new ResponseEntity<TeacherEntity>(teacherEntity, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/student/{username}")
@@ -475,7 +476,7 @@ public class AdminController {
 
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Student not found"), HttpStatus.NOT_FOUND);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/parent/{username}")
@@ -518,7 +519,7 @@ public class AdminController {
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/subject/{name}")
@@ -540,26 +541,6 @@ public class AdminController {
 		return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
 	}// TODO Nadji zasto ne radi
 
-//	@Secured("ROLE_ADMIN")
-//	@RequestMapping(method = RequestMethod.PUT, value = "/changePassword/{id}")
-//	public ResponseEntity<?> changePassword(@RequestParam String oldPassword, @RequestParam String newPassword,
-//			@PathVariable Integer id) {
-//
-//		UserEntity user = userRepository.findById(id).get();
-//
-//		if (user == null)
-//			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
-//
-//		if (user.getPassword().equals(oldPassword))
-//			user.setPassword(newPassword);
-//
-//		userRepository.save(user);
-//		return new ResponseEntity<UserEntity>(user, HttpStatus.OK);
-//	}
-
-	// TODO: PUT Povezivanje studenta sa roditeljima,
-	// profesor i predmet, ucenik i odeljenje, ucenik i razred
-
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/{userId}/addressId")
 	public ResponseEntity<?> addAddressToUser(@PathVariable Integer id, @RequestBody AddressEntity adr) {
@@ -578,40 +559,19 @@ public class AdminController {
 
 	}
 
-//	@RequestMapping(method = RequestMethod.PUT, value = "/grade")
-//	public ResponseEntity<?> changeGrade(@RequestBody GradeDTO grade) {
-////			if (newGrade.getName().equals(null) || newGrade.getId().equals(null) || newGrade.getGradeType().equals(null)) {
-////			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not complete."),
-////					HttpStatus.BAD_REQUEST);
-//////		}
-////			StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
-////			if (student == null) {
-////				return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);}
-////			SubjectEntity subject = subjectRepository.findByName(grade.getSubjectName()).get();
-////			GradeRecordEntity newGrade = new GradeRecordEntity();
-////			newGrade.setStudentGrade(student);
-////			newGrade.setSubjectGrade(subject);
-////			gradeRepository.save(newGrade);
-////			return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
-////			// automatski ce biti sacuvana i adresa/ return user;//prepravljeno sa slajda 102
-//		return null;
-//	}
-
-	// GET Predmeta Nastavnika Učenika Roditelja Ocena
-
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/teacher/{username}")
 	public ResponseEntity<?> getTeracher(@PathVariable String username) {
 		TeacherEntity teacher = teacherRepository.findByUsername(username).get();
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
-	}// Radi
-
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/teacher")
 	public ResponseEntity<?> getAllTerachers() {
 		List<TeacherEntity> teacher = (List<TeacherEntity>) teacherRepository.findAll();
 		return new ResponseEntity<List<TeacherEntity>>(teacher, HttpStatus.OK);
-	}// Radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parent/{username}")
@@ -621,15 +581,15 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
-	}// Radi
-
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parent")
 	public ResponseEntity<?> getAllParents() {
 		List<ParentEntity> parent = (List<ParentEntity>) parentRepository.findAll();
 		return new ResponseEntity<List<ParentEntity>>(parent, HttpStatus.OK);
-	}// Radi
-
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parentByStudentUsername/{studentUsername}")
 	public ResponseEntity<?> getParentsByStudentUsername(@PathVariable String studentUsername) {
@@ -639,8 +599,8 @@ public class AdminController {
 		}
 		List<ParentEntity> parent = parentRepository.findByStudentId(student.getId());
 		return new ResponseEntity<List<ParentEntity>>(parent, HttpStatus.OK);
-	}// Radi
-
+	}
+	
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/student/{username}")
 	public ResponseEntity<?> getStudent(@PathVariable String username) {
@@ -649,14 +609,14 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/student")
 	public ResponseEntity<?> getAllStudents() {
 		List<StudentEntity> student = (List<StudentEntity>) studentRepository.findAll();
 		return new ResponseEntity<List<StudentEntity>>(student, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject/{name}")
@@ -666,14 +626,14 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<SubjectEntity>(subject, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
 	public ResponseEntity<?> getAllSubjects() {
 		List<SubjectEntity> subject = (List<SubjectEntity>) subjectRepository.findAll();
 		return new ResponseEntity<List<SubjectEntity>>(subject, HttpStatus.OK);
-	}// radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/grade/{id}")
@@ -683,7 +643,7 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}// Radi
+	}
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/grade")
@@ -694,5 +654,5 @@ public class AdminController {
 
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
-	}// radi
+	}
 }

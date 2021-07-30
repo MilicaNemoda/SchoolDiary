@@ -43,8 +43,6 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 	
 	@Override
 	public Set<StudentEntity> findStudentBySubjectAndTeacher(String subjectName, String teacherUsername) {
-
-		
 		Integer subjectId = subjectRepository.findByName(subjectName).get().getId();
 		Integer teacherId = teacherRepository.findByUsername(teacherUsername).get().getId();
 		

@@ -11,8 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
 import helper.EGradeType;
@@ -39,7 +37,6 @@ public class GradeRecordEntity {
 				+ studentGrade + ", subjectGrade=" + subjectGrade + ", teacherGrade=" + teacherGrade + "]";
 	}
 
-	//TODO promeni nazive kolona da budu razumljivija!!!
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentGrade")
 	private StudentEntity studentGrade;
@@ -54,7 +51,6 @@ public class GradeRecordEntity {
 
 	public GradeRecordEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Integer getId() {

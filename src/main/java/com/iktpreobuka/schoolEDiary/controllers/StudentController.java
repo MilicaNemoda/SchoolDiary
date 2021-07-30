@@ -44,5 +44,5 @@ public class StudentController {
 		}
 		Set<GradeRecordEntity> grades = gradeDAOImpl.findAllGradesByStudent(studentUsername);
 		return new ResponseEntity<Set<GradeRecordEntity>>(grades, HttpStatus.OK);
-	}//radi
+	}
 }

@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-//@DiscriminatorValue("Teacher")
 public class TeacherEntity extends UserEntity {
 
 	

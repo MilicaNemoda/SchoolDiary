@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import helper.ESemester;
 
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -31,8 +30,6 @@ public class SchoolYearEntity {
 	@Max(value=8, message="School year must be 8 or less!")
 	@Column(nullable = false)
 	private Integer year;
-//	@Column(nullable = false)
-//	private ESemester semester;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "schoolYearSubject", fetch = FetchType.LAZY, cascade = { CascadeType.REFRESH })
@@ -44,7 +41,6 @@ public class SchoolYearEntity {
 
 	public SchoolYearEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Integer getId() {

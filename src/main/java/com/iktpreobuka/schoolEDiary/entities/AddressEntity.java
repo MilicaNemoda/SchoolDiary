@@ -42,7 +42,6 @@ public class AddressEntity {
 
 	public AddressEntity() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Integer getId() {

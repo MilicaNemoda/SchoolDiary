@@ -17,15 +17,9 @@ import javax.persistence.OneToMany;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-//@DiscriminatorValue("Student")
 public class StudentEntity extends UserEntity {
 	
-//	@JsonView(Views.Admin.class)
-//	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
-//	@ColumnDefault(value = "0001-01-01T00:00:00")
-//	private Integer yearOfBirth;
-
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY) //promenjeno u all
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY) 
 	@JoinColumn(name = "studentSchoolClass")
 	private SchoolClassEntity studentSchoolClass;
 

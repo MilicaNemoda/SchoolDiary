@@ -1,6 +1,5 @@
 package com.iktpreobuka.schoolEDiary.services;
 
-import java.util.List;
 import java.util.Set;
 
 import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
