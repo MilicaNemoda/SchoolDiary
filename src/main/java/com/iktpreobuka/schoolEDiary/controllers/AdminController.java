@@ -96,7 +96,7 @@ public class AdminController {
 
 	@InitBinder
 	protected void initUserCustomValidatorBinder(final WebDataBinder binder) {
-		binder.setValidator(UserCustomValidator);
+		binder.addValidators(UserCustomValidator);
 	}
 
 	@Secured("ROLE_ADMIN")

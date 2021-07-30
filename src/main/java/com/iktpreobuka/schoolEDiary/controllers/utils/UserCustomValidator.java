@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import com.iktpreobuka.schoolEDiary.entities.DTO.AdminDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.ParentDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.StudentDTO;
 import com.iktpreobuka.schoolEDiary.entities.DTO.TeacherDTO;
@@ -25,6 +26,8 @@ public class UserCustomValidator implements Validator {
 			user = (TeacherDTO) target;
 		} else if (target instanceof ParentDTO) {
 			user = (ParentDTO) target;
+		} else if (target instanceof AdminDTO) {
+			user = (AdminDTO) target;
 		}
 
 		if (!user.getPassword().equals(user.getRepeatedPassword())) {
