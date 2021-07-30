@@ -37,10 +37,6 @@ import com.iktpreobuka.schoolEDiary.repositories.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-// TODO : Razmisli da prebacis da bude 1 zajednicki Controller za sve klase koje extenduju UserEntity. Pa kada stigne UserDTO, da tu odlucis koji je tip, da li Teacher, Student, Admin...
-// TODO : Razmisli da renameujes ovo, mozda niej dobro da se Controller za login zove ovako? Mada je i on u materijalima
-// TODO : Resi i izbrisi sve TODOs do ispita :)
-
 @RestController
 public class UserController {
 
@@ -91,7 +87,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/addAdmin")
-	public ResponseEntity<?> addAdmin(@Valid @RequestBody UserDTO adminDTO, BindingResult result) {
+	public ResponseEntity<?> addAdmin(@Valid @RequestBody AdminDTO adminDTO, BindingResult result) {
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 			} else {

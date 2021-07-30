@@ -1,6 +1,5 @@
 package com.iktpreobuka.schoolEDiary.controllers;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +16,7 @@ import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
 import com.iktpreobuka.schoolEDiary.repositories.GradeRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
+import com.iktpreobuka.schoolEDiary.services.GradeRecordDAOImpl;
 import com.iktpreobuka.schoolEDiary.services.StudentDAOImpl;
 
 @RestController
@@ -32,14 +32,17 @@ public class StudentController {
 	@Autowired
 	StudentDAOImpl studentDAOImpl;
 	
+	@Autowired
+	GradeRecordDAOImpl gradeDAOImpl;
+	
 	@Secured("ROLE_STUDENT")
 	@RequestMapping(method = RequestMethod.GET, value = "/")
 	public ResponseEntity<?> getStudentGrades(@RequestParam String studentUsername) {
 		StudentEntity student = studentRepository.findByUsername(studentUsername).get();
 		if (student == null) {
-			return new ResponseEntity<RESTError>(new RESTError(404, "Student not found"), HttpStatus.NOT_FOUND);
+			return new ResponseEntity<RESTError>(new RESTError(404, "Student not found."), HttpStatus.NOT_FOUND);
 		}
-		Set<GradeRecordEntity> grades = gradeRepository.findAllByStudentGrade(student.getId());
+		Set<GradeRecordEntity> grades = gradeDAOImpl.findAllGradesByStudent(studentUsername);
 		return new ResponseEntity<Set<GradeRecordEntity>>(grades, HttpStatus.OK);
-	}
+	}//radi
 }

@@ -1,7 +1,6 @@
 package com.iktpreobuka.schoolEDiary.controllers;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.validation.Valid;
 
@@ -103,7 +102,7 @@ public class TeacherController {
 		logger.info("Teacher " + teacher.getUsername() + " gave grade " + newGrade.getGrade() + ", to "
 				+ student.getUsername() + " student.");
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
-	}
+	}// radi
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.DELETE, value = "/grade/{id}/{teachersUsername}")
@@ -126,14 +125,13 @@ public class TeacherController {
 				+ grade.getStudentGrade().getUsername() + " student.");
 
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}// Proradilo i ako nisam menjala, mislim da je do postmana??
+	}// Radi
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.PUT, value = "/grade/{id}/{teachersUsername}")
 	public ResponseEntity<?> changeGrade(@PathVariable String teachersUsername, @PathVariable Integer id,
 			@RequestBody GradeDTO newGrade) {
 		GradeRecordEntity grade = gradeRepository.findById(id).get();
-		
 		if (grade == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Grade not found."), HttpStatus.NOT_FOUND);
 		}
@@ -145,7 +143,6 @@ public class TeacherController {
 			return new ResponseEntity<RESTError>(new RESTError(403, "The teacher can't change the grade."),
 					HttpStatus.FORBIDDEN);
 		}
-
 		if (newGrade.getGrade() != null) {
 			grade.setGrade(newGrade.getGrade());
 		}
@@ -157,23 +154,22 @@ public class TeacherController {
 		}
 		if (newGrade.getSubjectName() != null) {
 			grade.setSubjectGrade(subjectRepository.findByName(newGrade.getSubjectName()).get());
+		}
 
-			if (!gradeRecordDAOImpl
-					.findStudentBySubjectAndTeacher(grade.getSubjectGrade().getName(), teacher.getUsername())
-					.contains(grade.getStudentGrade())) {
-				return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
-						HttpStatus.BAD_REQUEST);
-			}
+		if (!teacherDAOImpl.findStudentsByTeacherandSubject(teacher.getUsername(), grade.getSubjectGrade().getName())
+				.contains(grade.getStudentGrade())) {
+			return new ResponseEntity<RESTError>(new RESTError(400, "Grade parameters are not appropriate."),
+					HttpStatus.BAD_REQUEST);
 		}
 
 		logger.info("Teacher " + teacher.getUsername() + " changed grade.");
 
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/studentsBySubject")
-	public ResponseEntity<?> getTeachersStudentsBySubject(@RequestParam String teacherUsername,
+	public ResponseEntity<?> getStudentsBySubject(@RequestParam String teacherUsername,
 			@RequestParam String subjectName) {
 		if (teacherRepository.findByUsername(teacherUsername) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
@@ -181,13 +177,13 @@ public class TeacherController {
 		if (subjectRepository.findByName(subjectName) == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
 		}
-		if (teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName) == null) {
+		if (teacherDAOImpl.findStudentsByTeacherandSubject(teacherUsername, subjectName) == null) {
 			return new ResponseEntity<RESTError>(
 					new RESTError(404, "There arn't students for that teacher and subject."), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<Set<StudentEntity>>(
-				teacherDAOImpl.findTeachersStudentsForTheSubject(teacherUsername, subjectName), HttpStatus.OK);
-	}
+				teacherDAOImpl.findStudentsByTeacherandSubject(teacherUsername, subjectName), HttpStatus.OK);
+	}//radi ali proveri jos jednom
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/allStudents")
@@ -201,7 +197,7 @@ public class TeacherController {
 		}
 		return new ResponseEntity<Set<StudentEntity>>(teacherDAOImpl.findAllTeachersStudents(teacherUsername),
 				HttpStatus.OK);
-	}
+	}//radi
 
 	@Secured("ROLE_TEACHER")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
@@ -212,4 +208,4 @@ public class TeacherController {
 		return new ResponseEntity<Set<SubjectEntity>>(teacherDAOImpl.findAllTeachersSubjects(teacherUsername),
 				HttpStatus.OK);
 	}
-}
+}//radi

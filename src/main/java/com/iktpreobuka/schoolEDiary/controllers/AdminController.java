@@ -92,22 +92,12 @@ public class AdminController {
 	private GradeRecordDAOImpl gadeRecordDAOImpl;
 
 	@Autowired
-	UserCustomValidator userValidator;
+	UserCustomValidator UserCustomValidator;
 
 	@InitBinder
-	protected void initBinder(final WebDataBinder binder) {
-		binder.addValidators(userValidator);
+	protected void initUserCustomValidatorBinder(final WebDataBinder binder) {
+		binder.setValidator(UserCustomValidator);
 	}
-
-//	@Autowired
-//	private FileHandler fileHandler;
-//	
-//// TODO: POST List of users and other entities 
-//	@RequestMapping(method = RequestMethod.POST, path = "/userListUpload")
-//	public String userListUpload(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-//		
-//		return fileHandler.userListUpload(file, redirectAttributes);
-//	}
 
 // -- POST teacher
 	@Secured("ROLE_ADMIN")
@@ -116,17 +106,14 @@ public class AdminController {
 
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		} else {
+			UserCustomValidator.validate(teacher, result);
 		}
-//		if (result.hasErrors()) {
-//			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-//			} else {
-//			userValidator.validate(teacher, result);
-//			} Nisam uradila proveru passworda
+
 		if (teacherRepository.findByUsername(teacher.getUsername()).isPresent()) {
 			return new ResponseEntity<RESTError>(new RESTError(440, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
 		}
-		// TODO: proveri da li pasvord postoji?!
 
 		Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
 		for (String subject : teacher.getSubjects()) {
@@ -162,14 +149,12 @@ public class AdminController {
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/student")
 	public ResponseEntity<?> addStudent(@Valid @RequestBody StudentDTO student, BindingResult result) {
+		
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		} else {
+			UserCustomValidator.validate(student, result);
 		}
-//		if (result.hasErrors()) {
-//			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-//			} else {
-//			userValidator.validate(student, result);
-//			} Dodaj proveru passworda
 
 		if (studentRepository.findByUsername(student.getUsername()).isPresent()) {
 			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
@@ -189,7 +174,7 @@ public class AdminController {
 		if (schoolYear.getYear().toString().charAt(0) != (schoolClass.getName()).charAt(0)) {
 			return new ResponseEntity<RESTError>(new RESTError(400, "School year and school class do not match."),
 					HttpStatus.BAD_REQUEST);
-		} // TODO stacu sa ovim? custmVal
+		}
 
 		StudentEntity newStudent = new StudentEntity();
 
@@ -213,15 +198,13 @@ public class AdminController {
 		}
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-			} else {
-			userValidator.validate(parent, result);
-			}
+		} else {
+			UserCustomValidator.validate(parent, result);
+		}
 		Set<StudentEntity> children = new HashSet<StudentEntity>();
 		for (String childUsername : parent.getChildUsernames()) {
 			if (studentRepository.findByUsername(childUsername).get() == null) {
 				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
-
-				// TODO: proveri da li pasvord postoji?!
 			}
 			children.add(studentRepository.findByUsername(childUsername).get());
 		}
@@ -236,7 +219,7 @@ public class AdminController {
 		newParent.setStudent(children);
 		parentRepository.save(newParent);
 		return new ResponseEntity<ParentEntity>(newParent, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/grade")
@@ -262,8 +245,8 @@ public class AdminController {
 		newGrade.setSubjectGrade(subject);
 		gradeRepository.save(newGrade);
 		return new ResponseEntity<GradeRecordEntity>(newGrade, HttpStatus.OK);
-		// TODO bilo bi lepo da ne vraca i password za studenta u okviru ocene!!
-	}//radi
+
+	}// radi
 
 	// --POST address
 	@Secured("ROLE_ADMIN")
@@ -443,7 +426,7 @@ public class AdminController {
 
 		if (teacherRepository.findByUsername(username).isPresent()) {
 			TeacherEntity teacherEntity = teacherRepository.findByUsername(username).get();
-			
+
 			if (updatedTeacher.getFirstName() != null) {
 				teacherEntity.setFirstName(updatedTeacher.getFirstName());
 			}
@@ -484,7 +467,7 @@ public class AdminController {
 			return new ResponseEntity<TeacherEntity>(teacherEntity, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Teacher not found"), HttpStatus.NOT_FOUND);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/student/{username}")
@@ -492,7 +475,7 @@ public class AdminController {
 
 		if (studentRepository.findByUsername(username).isPresent()) {
 			StudentEntity studentEntity = studentRepository.findByUsername(username).get();
-			
+
 			if (updatedStudent.getFirstName() != null) {
 				studentEntity.setFirstName(updatedStudent.getFirstName());
 			}
@@ -524,13 +507,13 @@ public class AdminController {
 					studentEntity.setPassword(Encryption.getPassEncoded(updatedStudent.getPassword()));
 				}
 			}
-			
+
 			studentRepository.save(studentEntity);
 			return new ResponseEntity<StudentEntity>(studentEntity, HttpStatus.OK);
 
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Student not found"), HttpStatus.NOT_FOUND);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/parent/{username}")
@@ -574,26 +557,26 @@ public class AdminController {
 		return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 
 	}// radi
-	
+
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/subject/{name}")
 	public ResponseEntity<?> subjectUpdate(@RequestBody SubjectDTO updatedSubject, @PathVariable String name) {
 
 		if (subjectRepository.findByName(name).isPresent()) {
 			SubjectEntity subjectEntity = subjectRepository.findByName(name).get();
-				
+
 			if (updatedSubject.getWeeklyNumberOfLectures() != null) {
 				subjectEntity.setWeeklyNumberOfLectures(updatedSubject.getWeeklyNumberOfLectures());
 			}
 			if (updatedSubject.getYear() != null) {
 				subjectEntity.setSchoolYear(schoolYearRepository.findByYear(updatedSubject.getYear()).get());
-			}			
+			}
 
 			subjectRepository.save(subjectEntity);
 			return new ResponseEntity<SubjectEntity>(subjectEntity, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
-	}//TODO Nadji zasto ne radi
+	}// TODO Nadji zasto ne radi
 
 //	@Secured("ROLE_ADMIN")
 //	@RequestMapping(method = RequestMethod.PUT, value = "/changePassword/{id}")
@@ -659,14 +642,14 @@ public class AdminController {
 	public ResponseEntity<?> getTeracher(@PathVariable String username) {
 		TeacherEntity teacher = teacherRepository.findByUsername(username).get();
 		return new ResponseEntity<TeacherEntity>(teacher, HttpStatus.OK);
-	}//Radi
-	
+	}// Radi
+
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/teacher")
 	public ResponseEntity<?> getAllTerachers() {
 		List<TeacherEntity> teacher = (List<TeacherEntity>) teacherRepository.findAll();
 		return new ResponseEntity<List<TeacherEntity>>(teacher, HttpStatus.OK);
-	}//Radi
+	}// Radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parent/{username}")
@@ -676,14 +659,14 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<ParentEntity>(parent, HttpStatus.OK);
-	}//Radi
+	}// Radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parent")
 	public ResponseEntity<?> getAllParents() {
 		List<ParentEntity> parent = (List<ParentEntity>) parentRepository.findAll();
 		return new ResponseEntity<List<ParentEntity>>(parent, HttpStatus.OK);
-	}//Radi
+	}// Radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/parentByStudentUsername/{studentUsername}")
@@ -694,7 +677,7 @@ public class AdminController {
 		}
 		List<ParentEntity> parent = parentRepository.findByStudentId(student.getId());
 		return new ResponseEntity<List<ParentEntity>>(parent, HttpStatus.OK);
-	}//Radi
+	}// Radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/student/{username}")
@@ -704,14 +687,14 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<StudentEntity>(student, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/student")
 	public ResponseEntity<?> getAllStudents() {
 		List<StudentEntity> student = (List<StudentEntity>) studentRepository.findAll();
 		return new ResponseEntity<List<StudentEntity>>(student, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject/{name}")
@@ -721,14 +704,14 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<SubjectEntity>(subject, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/subject")
 	public ResponseEntity<?> getAllSubjects() {
 		List<SubjectEntity> subject = (List<SubjectEntity>) subjectRepository.findAll();
 		return new ResponseEntity<List<SubjectEntity>>(subject, HttpStatus.OK);
-	}//radi
+	}// radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/grade/{id}")
@@ -738,7 +721,7 @@ public class AdminController {
 			return new ResponseEntity<RESTError>(new RESTError(400, "User not found"), HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<GradeRecordEntity>(grade, HttpStatus.OK);
-	}//Radi
+	}// Radi
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.GET, value = "/grade")
@@ -749,5 +732,5 @@ public class AdminController {
 
 	private String createErrorMessage(BindingResult result) {
 		return result.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(" "));
-	}//radi
+	}// radi
 }

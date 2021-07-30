@@ -55,8 +55,8 @@ public class ParentDAOImpl implements ParentDAO {
 	public Set<GradeRecordEntity> findChildsGrade(String parentUsername){
 		ParentEntity parent = parentRepository.findByUsername(parentUsername).get();
 		
-		String sql = "select g.id from gradr_record_entity g and parent_student ps where "
-				+ "g.student_grade = ps.student_id and parent_id = " + parent.getId();
+		String sql = "select g.id from grade_record_entity g, parent_student ps where "
+				+ "g.student_grade = ps.student_id and ps.parent_id = " + parent.getId();
 									
 				Query query = em.createNativeQuery(sql);
 				List<Integer> result = query.getResultList();

@@ -36,7 +36,7 @@ public class ParentController {
 		}
 		return new ResponseEntity<Set<GradeRecordEntity>>(parentDAOImpl.findChildsGrade(parentUsername),
 				HttpStatus.OK);
-	}
+	}//radi
 	
 	@Secured("ROLE_PARENT")
 	@RequestMapping(method = RequestMethod.GET, value = "/children")
@@ -46,5 +46,5 @@ public class ParentController {
 		}
 		return new ResponseEntity<Set<StudentEntity>>(parentDAOImpl.findAllChildren(parentUsername),
 				HttpStatus.OK);
-	}
+	}//radi
 }

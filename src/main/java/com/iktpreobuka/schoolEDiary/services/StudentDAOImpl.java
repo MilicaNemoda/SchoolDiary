@@ -1,12 +1,19 @@
 package com.iktpreobuka.schoolEDiary.services;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
+import com.iktpreobuka.schoolEDiary.entities.TeacherEntity;
 import com.iktpreobuka.schoolEDiary.repositories.TeacherRepository;
 
 @Service
@@ -32,5 +39,6 @@ public class StudentDAOImpl implements StudentDAO {
 		em.createNativeQuery(sql4).executeUpdate();
 
 	}
-
+	
+	
 }

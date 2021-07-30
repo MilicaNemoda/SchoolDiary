@@ -11,8 +11,10 @@ import javax.persistence.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.iktpreobuka.schoolEDiary.entities.GradeRecordEntity;
 import com.iktpreobuka.schoolEDiary.entities.ParentEntity;
 import com.iktpreobuka.schoolEDiary.entities.StudentEntity;
+import com.iktpreobuka.schoolEDiary.repositories.GradeRepository;
 import com.iktpreobuka.schoolEDiary.repositories.ParentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.StudentRepository;
 import com.iktpreobuka.schoolEDiary.repositories.SubjectRepository;
@@ -34,6 +36,9 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 
 	@Autowired
 	ParentRepository parentRepository;
+	
+	@Autowired
+	GradeRepository gradeRepository;
 	
 	@Override
 	public Set<StudentEntity> findStudentBySubjectAndTeacher(String subjectName, String teacherUsername) {
@@ -92,6 +97,24 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 									
 				return parents;
 	}
+	
+	@Override
+	public Set<GradeRecordEntity> findAllGradesByStudent(String studentUsername) {
+		StudentEntity student = studentRepository.findByUsername(studentUsername).get();
+						
+		String sql =  "select id from grade_record_entity where student_grade = " + student.getId();
+									
+				Query query = em.createNativeQuery(sql);
+				List<Integer> result = query.getResultList();
+				
+				Set<GradeRecordEntity> grades = new HashSet<GradeRecordEntity>();
+				for (Integer gradeId : result) {
+					grades.add(gradeRepository.findById(gradeId).get());
+					}
+									
+				return grades;
+		}
+
 	
 	
 }
