@@ -19,17 +19,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TeacherEntity extends UserEntity {
-
 	
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)// prepravljeno u all
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Class", joinColumns = {
 			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Class_id", nullable = false, updatable = false) })
 	protected Set<SchoolClassEntity> classes = new HashSet<SchoolClassEntity>();
 
 	@JsonIgnore
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)// prepravljeno u all
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
 	@JoinTable(name = "Teacher_Subject", joinColumns = {
 			@JoinColumn(name = "Teacher_id", nullable = false, updatable = false) }, inverseJoinColumns = {
 					@JoinColumn(name = "Subject_id", nullable = false, updatable = false) })

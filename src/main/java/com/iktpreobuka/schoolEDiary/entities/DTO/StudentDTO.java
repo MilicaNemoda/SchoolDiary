@@ -1,6 +1,5 @@
 package com.iktpreobuka.schoolEDiary.entities.DTO;
 
-import java.sql.Date;
 
 public class StudentDTO extends UserDTO{
 //	@JsonView(Views.Admin.class)

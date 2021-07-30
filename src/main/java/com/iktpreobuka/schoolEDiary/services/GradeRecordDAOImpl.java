@@ -46,17 +46,27 @@ public class GradeRecordDAOImpl implements GradeRecordDAO {
 		Integer subjectId = subjectRepository.findByName(subjectName).get().getId();
 		Integer teacherId = teacherRepository.findByUsername(teacherUsername).get().getId();
 		
-		String sql =  "select s.id from student_entity s, subject_entity sb, teacher_subject t "
+
+		String sql1 =  "select s.id from student_entity s, subject_entity sb, teacher_subject t "
 				+ "where s.school_year_student = sb.school_year_subject and sb.id = t.subject_id " 
 				+"and teacher_id = " + teacherId + " and subject_id = " + subjectId;
+		
+		String sql2 = "select s.id from student_entity s, teacher_subject ts, teacher_class tc"
+				+ " where s.student_school_class = tc.class_id and ts.teacher_id = tc.teacher_id and tc.teacher_id ="
+				+ teacherId + " and subject_id =" + subjectId;
 									
-				Query query = em.createNativeQuery(sql);
-				List<Integer> result = query.getResultList();
+				Query query1 = em.createNativeQuery(sql1);
+				List<Integer> result1 = query1.getResultList();
+				
+				Query query2 = em.createNativeQuery(sql2);
+				List<Integer> result2 = query2.getResultList();
 				
 				Set<StudentEntity> students = new HashSet<StudentEntity>();
-				for (Integer studentId : result) {
-					students.add(studentRepository.findById(studentId).get());
-					}
+				for (Integer studentId1 : result1) {
+					for (Integer studentId2 : result2)
+					if(studentId1.equals(studentId2)) {
+					students.add(studentRepository.findById(studentId1).get());
+					}}
 									
 				return students;
 	}

@@ -94,7 +94,7 @@ public class AdminController {
 	@Autowired
 	UserCustomValidator UserCustomValidator;
 
-	@InitBinder
+	@InitBinder({"teacherDTO", "studentDTO", "parentDTO"})
 	protected void initUserCustomValidatorBinder(final WebDataBinder binder) {
 		binder.addValidators(UserCustomValidator);
 	}
@@ -110,14 +110,14 @@ public class AdminController {
 		}
 
 		if (teacherRepository.findByUsername(teacher.getUsername()).isPresent()) {
-			return new ResponseEntity<RESTError>(new RESTError(440, "Username already used, choose another."),
+			return new ResponseEntity<RESTError>(new RESTError(43, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
 		}
 
 		Set<SubjectEntity> subjects = new HashSet<SubjectEntity>();
 		for (String subject : teacher.getSubjects()) {
 			if (subjectRepository.findByName(subject).get() == null) {
-				return new ResponseEntity<RESTError>(new RESTError(400, "Subject not found."), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found."), HttpStatus.NOT_FOUND);
 			}
 			subjects.add(subjectRepository.findByName(subject).get());
 		}
@@ -125,7 +125,7 @@ public class AdminController {
 		Set<SchoolClassEntity> schoolClasses = new HashSet<SchoolClassEntity>();
 		for (String schoolClass : teacher.getClasses()) {
 			if (schoolClassRepository.findByName(schoolClass).get() == null) {
-				return new ResponseEntity<RESTError>(new RESTError(400, "Student not found."), HttpStatus.NOT_FOUND);
+				return new ResponseEntity<RESTError>(new RESTError(404, "Student not found."), HttpStatus.NOT_FOUND);
 			}
 			schoolClasses.add(schoolClassRepository.findByName(schoolClass).get());
 		}
@@ -150,27 +150,28 @@ public class AdminController {
 
 		if (result.hasErrors()) {
 			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
-		} else {
+		} 
+		else {
 			UserCustomValidator.validate(student, result);
 		}
 
 		if (studentRepository.findByUsername(student.getUsername()).isPresent()) {
-			return new ResponseEntity<RESTError>(new RESTError(444, "Username already used, choose another."),
+			return new ResponseEntity<RESTError>(new RESTError(403, "Username already used, choose another."),
 					HttpStatus.FORBIDDEN);
 		}
 
 		SchoolYearEntity schoolYear = schoolYearRepository.findByYear(student.getYear()).get();
 		if (schoolYear == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school year."), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError(404, "Wrong school year."), HttpStatus.BAD_REQUEST);
 		}
 
 		SchoolClassEntity schoolClass = schoolClassRepository.findByName(student.getSchoolClass()).get();
 		if (schoolClass == null) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "Wrong school class."), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<RESTError>(new RESTError(404, "Wrong school class."), HttpStatus.BAD_REQUEST);
 		}
 
 		if (schoolYear.getYear().toString().charAt(0) != (schoolClass.getName()).charAt(0)) {
-			return new ResponseEntity<RESTError>(new RESTError(400, "School year and school class do not match."),
+			return new ResponseEntity<RESTError>(new RESTError(404, "School year and school class do not match."),
 					HttpStatus.BAD_REQUEST);
 		}
 
@@ -220,8 +221,10 @@ public class AdminController {
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.POST, value = "/grade")
-	public ResponseEntity<?> addGrade(@RequestBody GradeDTO grade) {
-
+	public ResponseEntity<?> addGrade(@Valid @RequestBody GradeDTO grade, BindingResult result) {
+		if (result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		}
 		StudentEntity student = studentRepository.findByUsername(grade.getStudentUsername()).get();
 		if (student == null) {
 			return new ResponseEntity<RESTError>(new RESTError(404, "User not found"), HttpStatus.NOT_FOUND);
@@ -539,7 +542,7 @@ public class AdminController {
 			return new ResponseEntity<SubjectEntity>(subjectEntity, HttpStatus.OK);
 		}
 		return new ResponseEntity<RESTError>(new RESTError(404, "Subject not found"), HttpStatus.NOT_FOUND);
-	}// TODO Nadji zasto ne radi
+	} 
 
 	@Secured("ROLE_ADMIN")
 	@RequestMapping(method = RequestMethod.PUT, value = "/{userId}/addressId")
